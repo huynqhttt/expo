@@ -1,19 +1,49 @@
 {
-  "name": "react-native-intent-lancher-demo",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "_from": "react-native-i18n",
+  "_id": "react-native-i18n@2.0.15",
+  "_inBundle": false,
+  "_integrity": "sha512-V8VwUP0TLda3oJvgt5tdnFaOV7WXPhTjCTLO7sXI3C2SHggSbD4bCUryMzNJhesimJidH21V2Owvj4zAylHoQQ==",
+  "_location": "/react-native-i18n",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "react-native-i18n",
+    "name": "react-native-i18n",
+    "escapedName": "react-native-i18n",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
   },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/react-native-i18n/-/react-native-i18n-2.0.15.tgz",
+  "_shasum": "09b5a9836116fa7dbd0054c46e2d1014c1ef3c65",
+  "_spec": "react-native-i18n",
+  "_where": "/Users/huynguyen/Documents/demo/wingfield-app",
+  "author": {
+    "name": "Alexander Zaytsev"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "i18n-js": "3.0.11"
+  },
+  "deprecated": false,
+  "description": "Provide I18n to your React Native application",
+  "keywords": [
+    "react-native",
+    "react-component",
+    "ios",
+    "i18n"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "react-native-i18n",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/huynqhttt/react-native-intent-lancher-demo.git"
+    "url": "github.com/AlexanderZaytsev/react-native-i18n.git"
   },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/huynqhttt/react-native-intent-lancher-demo/issues"
-  },
-  "homepage": "https://github.com/huynqhttt/react-native-intent-lancher-demo#readme"
+  "version": "2.0.15"
 }
