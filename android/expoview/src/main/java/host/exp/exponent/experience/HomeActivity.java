@@ -18,15 +18,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
-import org.unimodules.core.interfaces.Package;
-import expo.modules.analytics.amplitude.AmplitudePackage;
+import expo.core.interfaces.Package;
 import expo.modules.barcodescanner.BarCodeScannerPackage;
 import expo.modules.constants.ConstantsPackage;
 import expo.modules.filesystem.FileSystemPackage;
 import expo.modules.font.FontLoaderPackage;
-import expo.modules.keepawake.KeepAwakePackage;
 import expo.modules.permissions.PermissionsPackage;
-import expo.modules.taskManager.TaskManagerPackage;
 import host.exp.exponent.Constants;
 import host.exp.exponent.RNObject;
 import host.exp.exponent.analytics.Analytics;
@@ -105,10 +102,7 @@ public class HomeActivity extends BaseExperienceActivity {
         new PermissionsPackage(),
         new FileSystemPackage(),
         new FontLoaderPackage(),
-        new BarCodeScannerPackage(),
-        new KeepAwakePackage(),
-        new AmplitudePackage(),
-        new TaskManagerPackage() // load expo-task-manager to restore tasks once the client is opened
+        new BarCodeScannerPackage()
     );
   }
 }

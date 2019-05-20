@@ -16,8 +16,7 @@ Pod::Spec.new do |s|
   s.preserve_paths = 'EXBarCodeScanner/**/*.{h,m}'
   s.requires_arc   = true
 
-  s.dependency 'UMCore'
-  s.dependency 'UMImageLoaderInterface'
+  s.dependency 'EXCore'
 
 end
 

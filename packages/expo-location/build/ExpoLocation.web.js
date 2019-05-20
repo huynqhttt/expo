@@ -1,4 +1,7 @@
-import { EventEmitter } from '@unimodules/core';
+import { EventEmitter } from 'expo-core';
+;
+;
+;
 class GeocoderError extends Error {
     constructor() {
         super('Geocoder service is not available for this device.');
@@ -41,9 +44,6 @@ export default {
     async watchDeviceHeading(headingId) {
         console.warn('Location.watchDeviceHeading: is not supported on web');
     },
-    async hasServicesEnabledAsync() {
-        return 'geolocation' in navigator;
-    },
     async geocodeAsync() {
         throw new GeocoderError();
     },
@@ -54,7 +54,7 @@ export default {
         return new Promise(resolve => {
             // @ts-ignore
             watchId = global.navigator.geolocation.watchPosition(location => {
-                emitter.emit('Expo.locationChanged', { watchId, location: positionToJSON(location) });
+                emitter.emit('Exponent.locationChanged', { watchId, location: positionToJSON(location) });
             }, null, options);
             resolve(watchId);
         });

@@ -3,7 +3,7 @@
 
 Pod::Spec.new do |s|
   s.name = "ExpoKit"
-  s.version = "33.0.0"
+  s.version = "32.0.0"
   s.summary = 'ExpoKit'
   s.description = 'ExpoKit allows native projects to integrate with the Expo SDK.'
   s.homepage = 'http://docs.expo.io'
@@ -24,9 +24,10 @@ Pod::Spec.new do |s|
     ss.dependency 'AppAuth', '~> 0.4'
     ss.dependency 'CocoaLumberjack', '~> 3.2.1'
     ss.dependency 'Crashlytics', '~> 3.8'
-    ss.dependency 'FBAudienceNetwork', '5.1.1'
-    ss.dependency 'FBSDKCoreKit', '4.40.0'
-    ss.dependency 'FBSDKLoginKit', '4.40.0'
+    ss.dependency 'FBAudienceNetwork', '4.99.0'
+    ss.dependency 'FBSDKCoreKit', '4.39.1'
+    ss.dependency 'FBSDKLoginKit', '4.39.1'
+    ss.dependency 'FBSDKShareKit', '4.39.1'
     ss.dependency 'Fabric', '~> 1.6'
     ss.dependency 'GoogleSignIn', '~> 4.1'
     ss.dependency 'GoogleMaps', '~> 2.5.0'
@@ -38,13 +39,13 @@ Pod::Spec.new do |s|
     ss.dependency 'React' # explicit dependency required for CocoaPods >= 1.5.0
 
     # Universal modules required by ExpoKit so the code compiles
-    ss.dependency 'UMCore'
-    ss.dependency 'UMReactNativeAdapter'
-    ss.dependency 'UMSensorsInterface'
-    ss.dependency 'UMFileSystemInterface'
-    ss.dependency 'UMPermissionsInterface'
-    ss.dependency 'UMCameraInterface'
-    ss.dependency 'UMConstantsInterface'
+    ss.dependency 'EXCore'
+    ss.dependency 'EXReactNativeAdapter'
+    ss.dependency 'EXSensorsInterface'
+    ss.dependency 'EXFileSystemInterface'
+    ss.dependency 'EXPermissionsInterface'
+    ss.dependency 'EXCameraInterface'
+    ss.dependency 'EXConstantsInterface'
   end
 
   s.subspec "Payments" do |ss|

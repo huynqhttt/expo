@@ -1,9 +1,9 @@
 // Copyright 2018-present 650 Industries. All rights reserved.
 
 #import <Foundation/Foundation.h>
-#import <UMCore/UMInternalModule.h>
-#import <UMFaceDetectorInterface/UMFaceDetectorManagerProvider.h>
+#import <EXCore/EXInternalModule.h>
+#import <EXFaceDetectorInterface/EXFaceDetectorManagerProvider.h>
 
-@interface EXFaceDetectorManagerProvider : NSObject <UMInternalModule, UMFaceDetectorManagerProvider>
+@interface EXFaceDetectorManagerProvider : NSObject <EXInternalModule, EXFaceDetectorManagerProvider>
 
 @end

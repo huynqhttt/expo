@@ -16,5 +16,8 @@ Pod::Spec.new do |s|
   s.preserve_paths = 'EXModuleTemplate/**/*.{h,m}'
   s.requires_arc   = true
 
-  s.dependency 'UMCore'
+  s.dependency 'EXCore'
+
 end
+
+  

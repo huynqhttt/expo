@@ -14,7 +14,6 @@
 #import "SEGMiddleware.h"
 #import "SEGContext.h"
 #import "SEGIntegrationsManager.h"
-#import "Internal/SEGUtils.h"
 
 static SEGAnalytics *__sharedInstance = nil;
 
@@ -345,8 +344,6 @@ NSString *const SEGBuildKeyV2 = @"SEGBuildKeyV2";
         [properties addEntriesFromDictionary:activity.userInfo];
         properties[@"url"] = activity.webpageURL.absoluteString;
         properties[@"title"] = activity.title ?: @"";
-        properties = [SEGUtils traverseJSON:properties
-                      andReplaceWithFilters:self.configuration.payloadFilters];
         [self track:@"Deep Link Opened" properties:[properties copy]];
     }
 }
@@ -354,8 +351,7 @@ NSString *const SEGBuildKeyV2 = @"SEGBuildKeyV2";
 - (void)openURL:(NSURL *)url options:(NSDictionary *)options
 {
     SEGOpenURLPayload *payload = [[SEGOpenURLPayload alloc] init];
-    payload.url = [NSURL URLWithString:[SEGUtils traverseJSON:url.absoluteString
-                                        andReplaceWithFilters:self.configuration.payloadFilters]];
+    payload.url = url;
     payload.options = options;
     [self run:SEGEventTypeOpenURL payload:payload];
 
@@ -366,8 +362,6 @@ NSString *const SEGBuildKeyV2 = @"SEGBuildKeyV2";
     NSMutableDictionary *properties = [NSMutableDictionary dictionaryWithCapacity:options.count + 2];
     [properties addEntriesFromDictionary:options];
     properties[@"url"] = url.absoluteString;
-    properties = [SEGUtils traverseJSON:properties
-                  andReplaceWithFilters:self.configuration.payloadFilters];
     [self track:@"Deep Link Opened" properties:[properties copy]];
 }
 
@@ -416,7 +410,7 @@ NSString *const SEGBuildKeyV2 = @"SEGBuildKeyV2";
 
 + (NSString *)version
 {
-    return @"3.6.10";
+    return @"3.6.9";
 }
 
 #pragma mark - Helpers

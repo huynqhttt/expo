@@ -3,7 +3,6 @@ import NextLink from 'next/link';
 
 import * as React from 'react';
 import * as Constants from '~/common/constants';
-import stripVersionFromPath from '~/common/stripVersionFromPath';
 
 const STYLES_LINK = css`
   display: block;
@@ -40,29 +39,13 @@ const STYLES_DEFAULT = css`
 `;
 
 export default class DocumentationSidebarLink extends React.Component {
-  componentDidMount() {
-    // Consistent link behavior across dev server and static export
-    global.__NEXT_DATA__.nextExport = true;
-  }
-
   isSelected() {
     if (!this.props.url) {
       return false;
     }
 
-    // Special case for root url
-    if (this.props.info.name === 'Getting to know Expo') {
-      const asPath = this.props.asPath;
-      if (this.props.asPath.match(/\/versions\/[\w\.]+\/$/)) {
-        return true;
-      }
-    }
-
-    const linkUrl = stripVersionFromPath(this.props.info.as || this.props.info.href);
-    if (
-      linkUrl === stripVersionFromPath(this.props.url.pathname) ||
-      linkUrl === stripVersionFromPath(this.props.asPath)
-    ) {
+    const linkUrl = this.props.info.as || this.props.info.href;
+    if (linkUrl === this.props.url.pathname || linkUrl === this.props.asPath) {
       return true;
     }
 
@@ -77,7 +60,10 @@ export default class DocumentationSidebarLink extends React.Component {
       : {};
 
     return (
-      <NextLink href={this.props.info.href} as={this.props.info.as || this.props.info.href}>
+      <NextLink
+        prefetch
+        href={this.props.info.href}
+        as={this.props.info.as || this.props.info.href}>
         <a
           {...customDataAttributes}
           className={`${STYLES_LINK} ${this.isSelected() ? STYLES_ACTIVE : STYLES_DEFAULT}`}>

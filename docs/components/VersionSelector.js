@@ -1,8 +1,9 @@
+import { orderBy } from 'lodash';
+
 import styled, { keyframes, css } from 'react-emotion';
 
 import * as React from 'react';
 import * as Constants from '~/common/constants';
-import * as Utilities from '~/common/utilities';
 import { VERSIONS, LATEST_VERSION } from '~/common/versions';
 
 import ChevronDownIcon from '~/components/icons/ChevronDown';
@@ -40,48 +41,45 @@ const STYLES_SELECT_ELEMENT = css`
   border-radius: 0px;
 `;
 
-const versionNumber = vString => {
-  const pattern = /v([0-9]+)\./,
-    match = vString.match(pattern),
-    number = parseInt(match[1], 10);
-  return number;
-};
-
 const orderVersions = versions => {
-  return versions.sort((a, b) => {
-    switch (a) {
-      case 'unversioned':
-        return 1;
-      case 'latest':
-        if (b == 'unversioned') {
-          return -1;
-        } else {
-          return 1;
-        }
-      default:
-        switch (b) {
-          case 'unversioned':
-          case 'latest':
-            return 1;
-          default:
-            return versionNumber(a) - versionNumber(b);
-        }
-    }
-  });
-};
+  versions = [...versions];
 
+  if (versions.indexOf('unversioned') >= 0) {
+    versions.splice(versions.indexOf('unversioned'), 1);
+  }
+
+  if (versions.indexOf('latest') >= 0) {
+    versions.splice(versions.indexOf('latest'), 1);
+  }
+
+  versions = orderBy(
+    versions,
+    v => {
+      let match = v.match(/v([0-9]+)\./);
+      return parseInt(match[1], 10);
+    },
+    ['asc']
+  );
+
+  versions.push('latest');
+
+  if (
+    (typeof window === 'object' && window._NODE_ENV === 'development') ||
+    (process.env.NODE_ENV && process.env.NODE_ENV === 'development')
+  ) {
+    versions.push('unversioned');
+  }
+
+  return versions;
+};
 
 export default class VersionSelector extends React.Component {
   render() {
     return (
       <div className={STYLES_SELECT} style={this.props.style}>
         <label className={STYLES_SELECT_TEXT} htmlFor="version-menu">
-          {Utilities.getUserFacingVersionString(this.props.version)} <ChevronDownIcon style={{ marginLeft: 8 }} />
+          {this.props.version} <ChevronDownIcon style={{ marginLeft: 8 }} />
         </label>
-        {// hidden links to help test-links spidering
-        VERSIONS.map(v => (
-          <a key={v} style={{ display: 'none' }} href={`/versions/${v}/`} />
-        ))}
         <select
           className={STYLES_SELECT_ELEMENT}
           id="version-menu"
@@ -91,7 +89,7 @@ export default class VersionSelector extends React.Component {
             .map(version => {
               return (
                 <option key={version} value={version}>
-                  {version === 'latest' ? 'latest (' + LATEST_VERSION + ')' : Utilities.getUserFacingVersionString(version)}
+                  {version === 'latest' ? 'latest (' + LATEST_VERSION + ')' : version}
                 </option>
               );
             })

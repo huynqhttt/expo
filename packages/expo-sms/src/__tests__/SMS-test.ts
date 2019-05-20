@@ -1,4 +1,4 @@
-import { NativeModulesProxy } from '@unimodules/core';
+import { NativeModulesProxy } from 'expo-core';
 
 import * as SMS from '../SMS';
 

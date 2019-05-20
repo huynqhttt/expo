@@ -3,15 +3,13 @@
 package expo.modules.sensors.modules;
 
 import android.content.Context;
-import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.hardware.SensorManager;
 import android.os.Bundle;
 
-import org.unimodules.core.Promise;
-import org.unimodules.core.interfaces.ExpoMethod;
-import org.unimodules.interfaces.sensors.SensorService;
-import org.unimodules.interfaces.sensors.services.MagnetometerService;
+import expo.core.Promise;
+import expo.core.interfaces.ExpoMethod;
+import expo.interfaces.sensors.SensorService;
+import expo.interfaces.sensors.services.MagnetometerService;
 
 public class MagnetometerModule extends BaseSensorModule {
   public MagnetometerModule(Context reactContext) {
@@ -57,12 +55,5 @@ public class MagnetometerModule extends BaseSensorModule {
   public void setUpdateInterval(int updateInterval, Promise promise) {
     super.setUpdateInterval(updateInterval);
     promise.resolve(null);
-  }
-
-  @ExpoMethod
-  public void isAvailableAsync(Promise promise) {
-    SensorManager mSensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
-    boolean isAvailable = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null;
-    promise.resolve(isAvailable);
   }
 }

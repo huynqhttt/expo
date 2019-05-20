@@ -2,7 +2,7 @@ package expo.loaders.provider.interfaces;
 
 import java.util.List;
 
-import org.unimodules.core.interfaces.Package;
+import expo.core.interfaces.Package;
 
 public interface AppLoaderPackagesProviderInterface<ReactPackageType> {
   /**

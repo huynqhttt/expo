@@ -1,8 +1,8 @@
 'use strict';
 
-import Constants from 'expo-constants';
+import { Constants } from 'expo';
 
-export const name = 'Import3';
+export const name = 'Import1';
 
 export function test(t) {
   t.describe(`import { Constants } from 'expo';`, () => {

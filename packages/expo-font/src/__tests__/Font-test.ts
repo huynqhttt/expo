@@ -8,7 +8,7 @@ let Font;
 let NativeModulesProxy;
 
 beforeEach(() => {
-  ({ NativeModulesProxy } = require('@unimodules/core'));
+  ({ NativeModulesProxy } = require('expo-core'));
   NativeModulesProxy.ExpoFontLoader.loadAsync.mockImplementation(async () => {});
   Font = require('expo-font');
 });

@@ -3,8 +3,6 @@
 //  Created by Nick Italiano on 11/5/16.
 //
 
-#ifdef HAVE_GOOGLE_MAPS
-
 #import <Foundation/Foundation.h>
 #import <GoogleMaps/GoogleMaps.h>
 
@@ -15,8 +13,5 @@
 @property (nonatomic, assign) int zIndex;
 @property NSInteger *maximumZ;
 @property NSInteger *minimumZ;
-@property BOOL flipY;
 
 @end
-
-#endif

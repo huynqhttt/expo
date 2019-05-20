@@ -1,6 +1,7 @@
-import { css } from 'react-emotion';
+import styled, { keyframes, css } from 'react-emotion';
 
 import * as React from 'react';
+import * as Constants from '~/common/constants';
 import * as Utilities from '~/common/utilities';
 
 import PermalinkIcon from '~/components/icons/Permalink';

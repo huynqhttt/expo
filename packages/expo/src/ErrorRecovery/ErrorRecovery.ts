@@ -1,10 +1,12 @@
-import { UnavailabilityError } from '@unimodules/core';
+import { UnavailabilityError } from 'expo-errors';
 import ExponentErrorRecovery from './ExponentErrorRecovery';
 
-export function setRecoveryProps(props: { [key: string]: any }): void {
-  if (!ExponentErrorRecovery.setRecoveryProps) {
-    throw new UnavailabilityError('ErrorRecovery', 'setRecoveryProps');
-  }
+export default {
+  setRecoveryProps(props: { [key: string]: any }): void {
+    if (!ExponentErrorRecovery.setRecoveryProps) {
+      throw new UnavailabilityError('ErrorRecovery', 'setRecoveryProps');
+    }
 
-  ExponentErrorRecovery.setRecoveryProps(props);
-}
+    return ExponentErrorRecovery.setRecoveryProps(props);
+  },
+};

@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 
 import net.openid.appauth.AppAuthConfiguration;
@@ -20,25 +21,32 @@ import net.openid.appauth.TokenResponse;
 import net.openid.appauth.connectivity.ConnectionBuilder;
 import net.openid.appauth.connectivity.DefaultConnectionBuilder;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import de.greenrobot.event.EventBus;
-import org.unimodules.core.ExportedModule;
-import org.unimodules.core.ModuleRegistry;
-import org.unimodules.core.Promise;
-import org.unimodules.core.interfaces.ActivityProvider;
-import org.unimodules.core.interfaces.ExpoMethod;
-import org.unimodules.core.interfaces.ModuleRegistryConsumer;
-import org.unimodules.core.interfaces.services.UIManager;
-import org.unimodules.interfaces.constants.ConstantsInterface;
+import expo.core.ExportedModule;
+import expo.core.ModuleRegistry;
+import expo.core.Promise;
+import expo.core.interfaces.ActivityProvider;
+import expo.core.interfaces.ExpoMethod;
+import expo.core.interfaces.ModuleRegistryConsumer;
+import expo.core.interfaces.services.UIManager;
+import expo.interfaces.constants.ConstantsInterface;
 
 public class AppAuthModule extends ExportedModule implements ModuleRegistryConsumer {
   private static final String TAG = "ExpoAppAuth";
+  private static final String ERROR_TAG = "ERR_APP_AUTH";
+  private static final String MANIFEST_URL_KEY = "experienceUrl";
   private ModuleRegistry mModuleRegistry;
-  private AuthTask mAuthTask = new AuthTask();
-  private Boolean mShouldMakeHTTPCalls;
+  private AuthTask authTask = new AuthTask();
+  private Boolean mCanMakeInsecureRequests;
   private Map<String, String> mAdditionalParametersMap;
   private String mClientSecret;
 
@@ -64,12 +72,12 @@ public class AppAuthModule extends ExportedModule implements ModuleRegistryConsu
     return null;
   }
 
-  private AuthorizationServiceConfiguration createOAuthServiceConfiguration(Map<String, String> config) {
-    return new AuthorizationServiceConfiguration(
-        Uri.parse(config.get(AppAuthConstants.Props.TOKEN_ENDPOINT)),
-        Uri.parse(config.get(AppAuthConstants.Props.AUTHORIZATION_ENDPOINT)),
-        config.containsKey(AppAuthConstants.Props.REGISTRATION_ENDPOINT) ? null : Uri.parse(config.get(AppAuthConstants.Props.REGISTRATION_ENDPOINT))
-    );
+  private Map<String, String> castObjectsToStrings(Map<String, Object> map) {
+    Map<String, String> newMap = new HashMap<>();
+    for (String strKey : map.keySet()) {
+      newMap.put(strKey, String.valueOf(map.get(strKey)));
+    }
+    return newMap;
   }
 
   private void refreshAsync(
@@ -79,43 +87,49 @@ public class AppAuthModule extends ExportedModule implements ModuleRegistryConsu
       final ArrayList scopes,
       final String clientId,
       final String refreshToken,
-      Map<String, String> serviceConfig
+      Map<String, String> serviceConfiguration
   ) {
 
-    final ConnectionBuilder builder = mShouldMakeHTTPCalls.equals(true) ? UnsafeConnectionBuilder.INSTANCE : DefaultConnectionBuilder.INSTANCE;
-
-    final AppAuthConfiguration authConfig = new AppAuthConfiguration
-        .Builder()
-        .setConnectionBuilder(builder)
-        .build();
+    final ConnectionBuilder builder = createConnectionBuilder();
+    final AppAuthConfiguration appAuthConfiguration = createAppAuthConfiguration(builder);
     final Map<String, String> finalAdditionalParametersMap = mAdditionalParametersMap;
 
-    if (serviceConfig != null) {
-      refreshWithConfig(
-          createOAuthServiceConfiguration(serviceConfig),
-          authConfig,
-          refreshToken,
-          clientId,
-          scopes,
-          redirectUrl,
-          finalAdditionalParametersMap,
-          clientSecret
-      );
+    if (serviceConfiguration != null) {
+      try {
+        refreshWithConfiguration(
+            createAuthorizationServiceConfiguration(serviceConfiguration),
+            appAuthConfiguration,
+            refreshToken,
+            clientId,
+            scopes,
+            redirectUrl,
+            finalAdditionalParametersMap,
+            clientSecret
+        );
+      } catch (Exception e) {
+        // Refresh token failed
+        authTask.reject(e);
+      }
     } else {
+      final Uri issuerUri = Uri.parse(issuer);
+      Uri configurationUri = issuerUri.buildUpon().appendPath(AuthorizationServiceConfiguration.WELL_KNOWN_PATH).appendPath(AuthorizationServiceConfiguration.OPENID_CONFIGURATION_RESOURCE).build();
+
+
       AuthorizationServiceConfiguration.fetchFromUrl(
-          Uri.parse(issuer).buildUpon().appendPath(AuthorizationServiceConfiguration.WELL_KNOWN_PATH).appendPath(AuthorizationServiceConfiguration.OPENID_CONFIGURATION_RESOURCE).build(),
+          configurationUri,
           new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
             public void onFetchConfigurationCompleted(
-                @Nullable AuthorizationServiceConfiguration authorizationServiceConfiguration,
-                @Nullable AuthorizationException authorizationException) {
-              if (authorizationException != null) {
-                mAuthTask.reject(authorizationException);
+                @Nullable AuthorizationServiceConfiguration fetchedConfiguration,
+                @Nullable AuthorizationException ex) {
+              if (ex != null) {
+                // config fetch failed
+                authTask.reject(ex);
                 return;
               }
 
-              refreshWithConfig(
-                  authorizationServiceConfiguration,
-                  authConfig,
+              refreshWithConfiguration(
+                  fetchedConfiguration,
+                  appAuthConfiguration,
                   refreshToken,
                   clientId,
                   scopes,
@@ -132,59 +146,59 @@ public class AppAuthModule extends ExportedModule implements ModuleRegistryConsu
   }
 
   private void authAsync(
-      final Map<String, String> params,
+      Map<String, String> additionalParametersMap,
       String issuer,
       String clientSecret,
       final String redirectUrl,
       final ArrayList scopes,
       final String clientId,
-      Map<String, String> serviceConfig
+      Map<String, String> serviceConfiguration
   ) {
-    if (EventBus.getDefault().isRegistered(this)) {
-      mAuthTask.reject(AppAuthConstants.Error.DEFAULT, "Cannot start a new task while another task is currently in progress");
-      return;
-    }
 
-    final ConnectionBuilder builder = mShouldMakeHTTPCalls.equals(true) ? UnsafeConnectionBuilder.INSTANCE : DefaultConnectionBuilder.INSTANCE;
-    final AppAuthConfiguration authConfig = new AppAuthConfiguration
-        .Builder()
-        .setConnectionBuilder(builder)
-        .build();
+    final ConnectionBuilder builder = createConnectionBuilder();
+    final AppAuthConfiguration appAuthConfiguration = createAppAuthConfiguration(builder);
     mClientSecret = clientSecret;
 
-    if (serviceConfig != null) {
-      authWithConfiguration(
-          authConfig,
-          clientId,
-          redirectUrl,
-          scopes,
-          createOAuthServiceConfiguration(serviceConfig),
-          params
-      );
+    if (serviceConfiguration != null) {
+      try {
+        authorizeWithConfiguration(
+            createAuthorizationServiceConfiguration(serviceConfiguration),
+            appAuthConfiguration,
+            clientId,
+            scopes,
+            redirectUrl,
+            additionalParametersMap
+        );
+      } catch (Exception e) {
+        // Auth failed
+        authTask.reject(e);
+      }
     } else {
+
+      final Uri issuerUri = Uri.parse(issuer);
+      Uri configurationUri = issuerUri.buildUpon().appendPath(AuthorizationServiceConfiguration.WELL_KNOWN_PATH).appendPath(AuthorizationServiceConfiguration.OPENID_CONFIGURATION_RESOURCE).build();
+
+      final Map<String, String> finalAdditionalParametersMap = additionalParametersMap;
+
       AuthorizationServiceConfiguration.fetchFromUrl(
-          Uri.parse(issuer).buildUpon().appendPath(AuthorizationServiceConfiguration.WELL_KNOWN_PATH).appendPath(AuthorizationServiceConfiguration.OPENID_CONFIGURATION_RESOURCE).build(),
+          configurationUri,
           new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
             public void onFetchConfigurationCompleted(
-                @Nullable AuthorizationServiceConfiguration authorizationServiceConfiguration,
-                @Nullable AuthorizationException authorizationException) {
-              if (authorizationException != null) {
+                @Nullable AuthorizationServiceConfiguration fetchedConfiguration,
+                @Nullable AuthorizationException ex) {
+              if (ex != null) {
                 // config fetch failed
-                mAuthTask.reject(authorizationException);
-                return;
-              }
-              if (EventBus.getDefault().isRegistered(this)) {
-                mAuthTask.reject(AppAuthConstants.Error.DEFAULT, "Cannot start a new task while another task is currently in progress");
+                authTask.reject(ex);
                 return;
               }
 
-              authWithConfiguration(
-                  authConfig,
+              authorizeWithConfiguration(
+                  fetchedConfiguration,
+                  appAuthConfiguration,
                   clientId,
-                  redirectUrl,
                   scopes,
-                  authorizationServiceConfiguration,
-                  params
+                  redirectUrl,
+                  finalAdditionalParametersMap
               );
             }
           },
@@ -203,36 +217,36 @@ public class AppAuthModule extends ExportedModule implements ModuleRegistryConsu
       @Override
       public void run() {
 
-        final String issuer = (String) options.get(AppAuthConstants.Props.ISSUER);
-        final String redirectUrl = (String) options.get(AppAuthConstants.Props.REDIRECT_URL);
-        final String clientId = (String) options.get(AppAuthConstants.Props.CLIENT_ID);
-        final String clientSecret = (String) options.get(AppAuthConstants.Props.CLIENT_SECRET);
-        final String refreshToken = (String) options.get(AppAuthConstants.Props.REFRESH_TOKEN);
+        final String issuer = (String) options.get("issuer");
+        final String redirectUrl = (String) options.get("redirectUrl");
+        final String clientId = (String) options.get("clientId");
+        final String clientSecret = (String) options.get("clientSecret");
+        final String refreshToken = (String) options.get("refreshToken");
 
-        final Boolean shouldMakeHTTPCalls = options.containsKey(AppAuthConstants.Props.CAN_MAKE_INSECURE_REQUESTS) ? (Boolean) options.get(AppAuthConstants.Props.CAN_MAKE_INSECURE_REQUESTS) : false;
-        final Boolean isRefresh = options.containsKey(AppAuthConstants.Props.IS_REFRESH) ? (Boolean) options.get(AppAuthConstants.Props.IS_REFRESH) : false;
+        final Boolean canMakeInsecureRequests = options.containsKey("canMakeInsecureRequests") ? (Boolean) options.get("canMakeInsecureRequests") : false;
+        final Boolean isRefresh = options.containsKey("isRefresh") ? (Boolean) options.get("isRefresh") : false;
 
-        final ArrayList<String> scopes = (ArrayList) options.get(AppAuthConstants.Props.SCOPES);
+        final ArrayList scopes = (ArrayList) options.get("scopes");
 
-        Map<String, String> params = new HashMap<>();
-        if (options.containsKey(AppAuthConstants.Props.ADDITIONAL_PARAMETERS) && options.get(AppAuthConstants.Props.ADDITIONAL_PARAMETERS) instanceof Map) {
-          params = Serialization.jsonToStrings((Map<String, Object>) options.get(AppAuthConstants.Props.ADDITIONAL_PARAMETERS));
+        Map<String, String> additionalParametersMap = new HashMap<>();
+        if (options.containsKey("additionalParameters") && options.get("additionalParameters") instanceof Map) {
+          additionalParametersMap = castObjectsToStrings((Map<String, Object>) options.get("additionalParameters"));
         }
 
-        Map<String, String> serviceConfig = null;
-        if (options.containsKey(AppAuthConstants.Props.SERVICE_CONFIGURATION) && options.get(AppAuthConstants.Props.SERVICE_CONFIGURATION) instanceof Map) {
-          serviceConfig = Serialization.jsonToStrings((Map<String, Object>) options.get(AppAuthConstants.Props.SERVICE_CONFIGURATION));
+        Map<String, String> serviceConfiguration = null;
+        if (options.containsKey("serviceConfiguration") && options.get("serviceConfiguration") instanceof Map) {
+          serviceConfiguration = castObjectsToStrings((Map<String, Object>) options.get("serviceConfiguration"));
         }
 
-        mAdditionalParametersMap = params;
-        mShouldMakeHTTPCalls = shouldMakeHTTPCalls;
+        mAdditionalParametersMap = additionalParametersMap;
+        mCanMakeInsecureRequests = canMakeInsecureRequests;
 
-        mAuthTask.update(promise, "Get Auth");
+        authTask.update(promise, "Get Auth");
 
         if (isRefresh.equals(true)) {
-          refreshAsync(issuer, clientSecret, redirectUrl, scopes, clientId, refreshToken, serviceConfig);
+          refreshAsync(issuer, clientSecret, redirectUrl, scopes, clientId, refreshToken, serviceConfiguration);
         } else {
-          authAsync(params, issuer, clientSecret, redirectUrl, scopes, clientId, serviceConfig);
+          authAsync(additionalParametersMap, issuer, clientSecret, redirectUrl, scopes, clientId, serviceConfiguration);
         }
       }
     });
@@ -246,56 +260,55 @@ public class AppAuthModule extends ExportedModule implements ModuleRegistryConsu
   }
 
   private AuthorizationService.TokenResponseCallback getTokenCallback() {
-    return new AuthorizationService.TokenResponseCallback() {
+    AuthorizationService.TokenResponseCallback tokenResponseCallback = new AuthorizationService.TokenResponseCallback() {
 
       @Override
       public void onTokenRequestCompleted(
-          TokenResponse resp, AuthorizationException authorizationException) {
-        if (resp == null) {
-          mAuthTask.reject(authorizationException);
-          return;
+          TokenResponse resp, AuthorizationException ex) {
+        if (resp != null) {
+          authTask.resolve(tokenResponseToBundle(resp));
+        } else {
+          authTask.reject(ex);
         }
-        mAuthTask.resolve(Serialization.tokenResponseNativeToJSON(resp));
       }
     };
+    return tokenResponseCallback;
   }
 
-  private void authWithConfiguration(
-      final AppAuthConfiguration authConfig,
+  private void authorizeWithConfiguration(
+      final AuthorizationServiceConfiguration serviceConfiguration,
+      final AppAuthConfiguration configuration,
       final String clientId,
+      final ArrayList scopes,
       final String redirectUrl,
-      final ArrayList<String> scopes,
-      final AuthorizationServiceConfiguration serviceConfig,
       final Map<String, String> parameters
   ) {
 
-    AuthorizationRequest.Builder authReqBuilder = new AuthorizationRequest.Builder(serviceConfig, clientId, ResponseTypeValues.CODE, Uri.parse(redirectUrl));
+    AuthorizationRequest.Builder authRequestBuilder = new AuthorizationRequest.Builder(serviceConfiguration, clientId, ResponseTypeValues.CODE, Uri.parse(redirectUrl));
 
     if (scopes != null) {
-      String scopesString = Serialization.scopesToString(scopes);
+      String scopesString = tokenizeScopes(scopes);
       if (scopesString != null) {
-        authReqBuilder.setScope(scopesString);
+        authRequestBuilder.setScope(scopesString);
       }
     }
 
     if (parameters != null) {
-      if (parameters.containsKey(AppAuthConstants.HTTPS.DISPLAY)) {
-        authReqBuilder.setDisplay(parameters.get(AppAuthConstants.HTTPS.DISPLAY));
-        parameters.remove(AppAuthConstants.HTTPS.DISPLAY);
+      if (parameters.containsKey("login_hint")) {
+        authRequestBuilder.setLoginHint(parameters.get("login_hint"));
+        parameters.remove("login_hint");
       }
-      if (parameters.containsKey(AppAuthConstants.HTTPS.PROMPT)) {
-        authReqBuilder.setPrompt(parameters.get(AppAuthConstants.HTTPS.PROMPT));
-        parameters.remove(AppAuthConstants.HTTPS.PROMPT);
+      if (parameters.containsKey("display")) {
+        authRequestBuilder.setDisplay(parameters.get("display"));
+        parameters.remove("display");
       }
-      if (parameters.containsKey(AppAuthConstants.HTTPS.LOGIN_HINT)) {
-        authReqBuilder.setLoginHint(parameters.get(AppAuthConstants.HTTPS.LOGIN_HINT));
-        parameters.remove(AppAuthConstants.HTTPS.LOGIN_HINT);
+      if (parameters.containsKey("prompt")) {
+        authRequestBuilder.setPrompt(parameters.get("prompt"));
+        parameters.remove("prompt");
       }
-      authReqBuilder.setAdditionalParameters(parameters);
+      authRequestBuilder.setAdditionalParameters(parameters);
     }
 
-
-    // TODO: Bacon: Prevent double register - this is fatal
     EventBus.getDefault().register(this);
 
     Activity activity = getCurrentActivity();
@@ -304,85 +317,158 @@ public class AppAuthModule extends ExportedModule implements ModuleRegistryConsu
 
     ConstantsInterface constantsService = mModuleRegistry.getModule(ConstantsInterface.class);
     if (!"standalone".equals(constantsService.getAppOwnership())) {
-      if (!constantsService.getConstants().containsKey(AppAuthConstants.MANIFEST_URL)) {
-        mAuthTask.reject(AppAuthConstants.Error.DEFAULT, "Missing " + AppAuthConstants.MANIFEST_URL + " in the experience Constants");
+      if (!constantsService.getConstants().containsKey(MANIFEST_URL_KEY)) {
+        authTask.reject(ERROR_TAG, "Missing " + MANIFEST_URL_KEY + " in the experience Constants");
         return;
       } else {
-        String experienceUrl = (String) constantsService.getConstants().get(AppAuthConstants.MANIFEST_URL);
+        String experienceUrl = (String) constantsService.getConstants().get(MANIFEST_URL_KEY);
         postAuthIntent.putExtra(AppAuthBrowserActivity.EXTRA_REDIRECT_EXPERIENCE_URL, experienceUrl);
       }
     }
 
-    AuthorizationRequest authorizationRequest = authReqBuilder.build();
-    int hash = authorizationRequest.hashCode();
-    PendingIntent pendingIntent = PendingIntent.getActivity(activity, hash, postAuthIntent, 0);
-    AuthorizationService authorizationService = new AuthorizationService(activity, authConfig);
-    authorizationService.performAuthorizationRequest(authorizationRequest, pendingIntent, pendingIntent);
+    AuthorizationRequest request = authRequestBuilder.build();
+    PendingIntent pendingIntent = PendingIntent.getActivity(activity, request.hashCode(), postAuthIntent, 0);
+    AuthorizationService service = new AuthorizationService(activity, configuration);
+    service.performAuthorizationRequest(request, pendingIntent, pendingIntent);
   }
 
   public void onEvent(AppAuthBrowserActivity.OAuthResultEvent event) {
     EventBus.getDefault().unregister(this);
 
-    if (event.getException() != null) {
-      mAuthTask.reject(event.getException());
+    if (event.exception != null) {
+      authTask.reject(event.exception);
       return;
     }
 
-    ConnectionBuilder connectionBuilder;
-    if (mShouldMakeHTTPCalls.equals(false)) {
-      connectionBuilder = DefaultConnectionBuilder.INSTANCE;
-    } else {
-      connectionBuilder = UnsafeConnectionBuilder.INSTANCE;
-    }
-    AppAuthConfiguration authConfig = new AppAuthConfiguration
-        .Builder()
-        .setConnectionBuilder(connectionBuilder)
-        .build();
-    TokenRequest tokenReq = event.getResponse().createTokenExchangeRequest(mAdditionalParametersMap);
-    performTokenReq(tokenReq, authConfig, mClientSecret);
+    AppAuthConfiguration configuration = createAppAuthConfiguration(createConnectionBuilder());
+    TokenRequest tokenRequest = event.response.createTokenExchangeRequest(mAdditionalParametersMap);
+    performTokenRequest(tokenRequest, configuration, mClientSecret);
   }
 
-  private void refreshWithConfig(
-      AuthorizationServiceConfiguration serviceConfig,
-      AppAuthConfiguration authConfig,
+  private void refreshWithConfiguration(
+      AuthorizationServiceConfiguration serviceConfiguration,
+      AppAuthConfiguration appAuthConfiguration,
       String refreshToken,
       String clientId,
       ArrayList scopes,
       String redirectUrl,
-      Map<String, String> params,
+      Map<String, String> additionalParametersMap,
       String clientSecret
   ) {
 
     String scopesString = null;
 
     if (scopes != null) {
-      scopesString = Serialization.scopesToString(scopes);
+      scopesString = tokenizeScopes(scopes);
     }
 
-    TokenRequest.Builder tokenReqBuilder =
+    TokenRequest.Builder tokenRequestBuilder =
         new TokenRequest.Builder(
-            serviceConfig,
-            clientId)
+            serviceConfiguration,
+            clientId
+        )
             .setRefreshToken(refreshToken)
             .setRedirectUri(Uri.parse(redirectUrl));
 
     if (scopesString != null) {
-      tokenReqBuilder.setScope(scopesString);
+      tokenRequestBuilder.setScope(scopesString);
     }
-    if (!params.isEmpty()) {
-      tokenReqBuilder.setAdditionalParameters(params);
+
+    if (!additionalParametersMap.isEmpty()) {
+      tokenRequestBuilder.setAdditionalParameters(additionalParametersMap);
     }
-    performTokenReq(tokenReqBuilder.build(), authConfig, clientSecret);
+
+    TokenRequest tokenRequest = tokenRequestBuilder.build();
+
+    performTokenRequest(tokenRequest, appAuthConfiguration, clientSecret);
   }
 
-  private void performTokenReq(TokenRequest tokenReq, AppAuthConfiguration authConfig, String clientSecret) {
-    AuthorizationService authorizationService = new AuthorizationService(getContext(), authConfig);
+  private void performTokenRequest(TokenRequest tokenRequest, AppAuthConfiguration appAuthConfiguration, String clientSecret) {
+    AuthorizationService authService = new AuthorizationService(getContext(), appAuthConfiguration);
 
     if (clientSecret != null) {
       ClientAuthentication clientAuth = new ClientSecretBasic(clientSecret);
-      authorizationService.performTokenRequest(tokenReq, clientAuth, getTokenCallback());
+      authService.performTokenRequest(tokenRequest, clientAuth, getTokenCallback());
     } else {
-      authorizationService.performTokenRequest(tokenReq, getTokenCallback());
+      authService.performTokenRequest(tokenRequest, getTokenCallback());
     }
+  }
+
+  private String tokenizeScopes(ArrayList array) {
+    StringBuilder strBuilder = new StringBuilder();
+    for (int i = 0; i < array.size(); i++) {
+      if (i != 0) {
+        strBuilder.append(' ');
+      }
+      strBuilder.append(array.get(i));
+    }
+    return strBuilder.toString();
+  }
+
+  private Bundle tokenResponseToBundle(TokenResponse response) {
+    Bundle map = new Bundle();
+
+    map.putString("accessToken", response.accessToken);
+
+    if (response.accessTokenExpirationTime != null) {
+      Date expirationDate = new Date(response.accessTokenExpirationTime);
+      SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+      formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+      String expirationDateString = formatter.format(expirationDate);
+      map.putString("accessTokenExpirationDate", expirationDateString);
+    }
+
+    Bundle additionalParametersMap = new Bundle();
+
+    if (!response.additionalParameters.isEmpty()) {
+
+      Iterator<String> iterator = response.additionalParameters.keySet().iterator();
+
+      while (iterator.hasNext()) {
+        String key = iterator.next();
+        additionalParametersMap.putString(key, response.additionalParameters.get(key));
+      }
+    }
+
+    map.putBundle("additionalParameters", additionalParametersMap);
+    map.putString("idToken", response.idToken);
+    map.putString("refreshToken", response.refreshToken);
+    map.putString("tokenType", response.tokenType);
+
+    return map;
+  }
+
+  private AppAuthConfiguration createAppAuthConfiguration(ConnectionBuilder connectionBuilder) {
+    return new AppAuthConfiguration
+        .Builder()
+        .setConnectionBuilder(connectionBuilder)
+        .build();
+  }
+
+  private ConnectionBuilder createConnectionBuilder() {
+    return mCanMakeInsecureRequests.equals(true) ? UnsafeConnectionBuilder.INSTANCE : DefaultConnectionBuilder.INSTANCE;
+  }
+
+  private AuthorizationServiceConfiguration createAuthorizationServiceConfiguration(Map<String, String> serviceConfiguration) throws Exception {
+    if (!serviceConfiguration.containsKey("authorizationEndpoint")) {
+      throw new Exception("serviceConfiguration passed without an authorizationEndpoint");
+    }
+
+    if (!serviceConfiguration.containsKey("tokenEndpoint")) {
+      throw new Exception("serviceConfiguration passed without a tokenEndpoint");
+    }
+
+    Uri authorizationEndpoint = Uri.parse(serviceConfiguration.get("authorizationEndpoint"));
+    Uri tokenEndpoint = Uri.parse(serviceConfiguration.get("tokenEndpoint"));
+    Uri registrationEndpoint = null;
+    if (serviceConfiguration.containsKey("registrationEndpoint")) {
+      registrationEndpoint = Uri.parse(serviceConfiguration.get("registrationEndpoint"));
+    }
+
+    return new AuthorizationServiceConfiguration(
+        authorizationEndpoint,
+        tokenEndpoint,
+        registrationEndpoint
+    );
   }
 }

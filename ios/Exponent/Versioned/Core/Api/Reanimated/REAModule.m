@@ -1,7 +1,6 @@
 #import "REAModule.h"
 
 #import "REANodesManager.h"
-#import "Transitioning/REATransitionManager.h"
 
 typedef void (^AnimatedOperation)(REANodesManager *nodesManager);
 
@@ -9,14 +8,12 @@ typedef void (^AnimatedOperation)(REANodesManager *nodesManager);
 {
   REANodesManager *_nodesManager;
   NSMutableArray<AnimatedOperation> *_operations;
-  REATransitionManager *_transitionManager;
 }
 
 RCT_EXPORT_MODULE(ReanimatedModule);
 
 - (void)invalidate
 {
-  _transitionManager = nil;
   [_nodesManager invalidate];
   [self.bridge.eventDispatcher removeDispatchObserver:self];
   [self.bridge.uiManager.observerCoordinator removeObserver:self];
@@ -38,17 +35,8 @@ RCT_EXPORT_MODULE(ReanimatedModule);
                                                 uiManager:self.bridge.uiManager];
   _operations = [NSMutableArray new];
 
-  _transitionManager = [[REATransitionManager alloc] initWithUIManager:self.bridge.uiManager];
-
   [bridge.eventDispatcher addDispatchObserver:self];
   [bridge.uiManager.observerCoordinator addObserver:self];
-}
-
-#pragma mark -- Transitioning API
-
-RCT_EXPORT_METHOD(animateNextTransition:(nonnull NSNumber *)rootTag config:(NSDictionary *)config)
-{
-  [_transitionManager animateNextTransitionInRoot:rootTag withConfig:config];
 }
 
 #pragma mark -- API

@@ -7,6 +7,7 @@ const shell = require('shelljs');
 const yesno = require('yesno');
 const spawnAsync = require('@exponent/spawn-async');
 const path = require('path');
+const { Modules } = require('xdl');
 
 const LIB_NAMES = [
   'libfb',
@@ -24,7 +25,7 @@ const LIB_NAMES = [
   'packagerconnectionjnifb',
   'privatedata',
   'yogafastmath',
-  'fabricjscjni',
+  'fabricjscjni'
 ];
 
 function renameLib(lib, abiVersion) {
@@ -67,9 +68,9 @@ async function processMkFileAsync(filename, abiVersion) {
   await fs.truncate(filename, 0);
   let lines = fileString.split('\n');
   for (let i = 0; i < lines.length; i++) {
-    let line = lines[i];
-    line = processLine(line, abiVersion);
-    await fs.appendFile(filename, `${line}\n`);
+     let line = lines[i];
+     line = processLine(line, abiVersion);
+     await fs.appendFile(filename, `${line}\n`);
   }
 }
 
@@ -86,7 +87,7 @@ exports.renameJNILibsAsync = async function renameJNILibsAsync(abiVersion) {
     let reactAndroidJNIPath = '../android/versioned-react-native/ReactAndroid/src/main/jni';
     shell.exec(
       `find ${reactCommonPath} ${reactAndroidJNIPath} -type f -print0 | ` +
-        `xargs -0 sed -i '' 's/${pathForPackage}/abi${abiVersion}\\/${pathForPackage}/g'`
+        `xargs -0 sed -i '' 's/${pathForPackage}/abi${abiVersion}\\\/${pathForPackage}/g'`
     );
   });
 
@@ -157,74 +158,39 @@ async function spawnAsyncPrintCommand(command, args = [], other) {
   await spawnAsync(command, args, other);
 }
 
-async function findUnimodules(pkgDir) {
-  console.log(`Searching for unimodules in ${pkgDir} directory.`);
-
-  const unimodules = [];
-
-  const unimoduleJsonPaths = await glob(`${pkgDir}/**/unimodule.json`);
-  for (const unimoduleJsonPath of unimoduleJsonPaths) {
-    const pkgJsonPath = path.join(path.dirname(unimoduleJsonPath), 'package.json');
-    const buildGradlePath = path.join(path.dirname(unimoduleJsonPath), 'android', 'build.gradle');
-    if ((await fs.pathExists(pkgJsonPath)) && (await fs.pathExists(buildGradlePath))) {
-      const unimoduleJson = await fs.readJson(unimoduleJsonPath);
-      const pkgJson = await fs.readJson(pkgJsonPath);
-      const buildGradle = await fs.readFile(buildGradlePath, 'utf-8');
-
-      const name = unimoduleJson.name;
-      const version = buildGradle.match(/^version ?= ?'([0-9]+.[0-9]+.[0-9]+)'\n/m)[1] || pkgJson.version;
-      const group = buildGradle.match(/^group ?= ?'([a-zA-Z]+.[a-zA-Z]+.[a-zA-Z]+)'\n/m)[1];
-
-      console.log(`Found module ${group}:${name}:${version}`);
-
-      unimodules.push({ name, group, version });
-    }
-  }
-
-  return unimodules;
-}
-
 exports.updateExpoViewAsync = async function updateExpoViewAsync(sdkVersion) {
   let androidRoot = path.join(process.cwd(), '..', 'android');
   let appBuildGradle = path.join(androidRoot, 'app', 'build.gradle');
   let expoViewBuildGradle = path.join(androidRoot, 'expoview', 'build.gradle');
-  const constantsJava = path.join(
-    androidRoot,
-    'expoview/src/main/java/host/exp/exponent/Constants.java'
-  );
-  const multipleVersionReactNativeActivity = path.join(
-    androidRoot,
-    'expoview/src/main/java/host/exp/exponent/experience/MultipleVersionReactNativeActivity.java'
-  );
+  const constantsJava = path.join(androidRoot, 'expoview/src/main/java/host/exp/exponent/Constants.java');
+  const multipleVersionReactNativeActivity = path.join(androidRoot, 'expoview/src/main/java/host/exp/exponent/experience/MultipleVersionReactNativeActivity.java');
 
   // Modify permanently
-  await regexFileAsync(expoViewBuildGradle, /version = '[\d.]+'/, `version = '${sdkVersion}'`);
+  await regexFileAsync(expoViewBuildGradle, /version = '[\d\.]+'/, `version = '${sdkVersion}'`);
   await regexFileAsync(
     expoViewBuildGradle,
-    /api 'com.facebook.react:react-native:[\d.]+'/,
+    /api 'com.facebook.react:react-native:[\d\.]+'/,
     `api 'com.facebook.react:react-native:${sdkVersion}'`
   );
   await regexFileAsync(
     path.join(androidRoot, 'ReactAndroid', 'release.gradle'),
-    /version = '[\d.]+'/,
+    /version = '[\d\.]+'/,
     `version = '${sdkVersion}'`
   );
   await regexFileAsync(
     path.join(androidRoot, 'app', 'build.gradle'),
-    /host.exp.exponent:expoview:[\d.]+/,
+    /host.exp.exponent:expoview:[\d\.]+/,
     `host.exp.exponent:expoview:${sdkVersion}`
   );
 
-  await stashFileAsync(appBuildGradle);
+  // getDetachableModulesForPlatform was breaking on face detector
+  const detachableUniversalModules = Modules.getAllNativeForExpoClientOnPlatform('android');
+
   await stashFileAsync(expoViewBuildGradle);
   await stashFileAsync(multipleVersionReactNativeActivity);
   await stashFileAsync(constantsJava);
   // Modify temporarily
-  await regexFileAsync(
-    constantsJava,
-    /TEMPORARY_ABI_VERSION\s*=\s*null/,
-    `TEMPORARY_ABI_VERSION = "${sdkVersion}"`
-  );
+  await regexFileAsync(constantsJava, /TEMPORARY_ABI_VERSION\s*=\s*null/, `TEMPORARY_ABI_VERSION = "${sdkVersion}"`);
   await regexFileAsync(
     constantsJava,
     `// WHEN_DISTRIBUTING_REMOVE_FROM_HERE`,
@@ -260,34 +226,23 @@ exports.updateExpoViewAsync = async function updateExpoViewAsync(sdkVersion) {
     'WHEN_DISTRIBUTING_REMOVE_TO_HERE */'
   );
 
-  const detachableUniversalModules = await findUnimodules('../packages');
-
   // Clear maven local so that we don't end up with multiple versions
   await spawnAsyncPrintCommand('rm', [
     '-rf',
     path.join(process.env.HOME, '/.m2/repository/host/exp/exponent/expoview'),
-    ...detachableUniversalModules.map(({ name, group }) =>
-      path.join(process.env.HOME, `/.m2/repository/${group.replace(/\./g, '/')}/${name}`)
+    ...detachableUniversalModules.map(({ libName }) =>
+      path.join(process.env.HOME, `/.m2/repository/host/exp/exponent/${libName}`)
     ),
   ]);
   await spawnAsyncPrintCommand('rm', [
     '-rf',
     path.join(process.env.HOME, '/.m2/repository/com/facebook/react'),
   ]);
-  // expokit-npm-package too
-  await spawnAsyncPrintCommand('rm', [
-    '-rf',
-    path.join(androidRoot, 'maven/host/exp/exponent'),
-  ]);
-  await spawnAsyncPrintCommand('rm', [
-    '-rf',
-    path.join(androidRoot, 'maven/com/facebook/react'),
-  ]);
 
   // Build RN and exponent view
   const archivesToUpload = [
     'ReactAndroid',
-    ...detachableUniversalModules.map(({ name }) => name),
+    ...detachableUniversalModules.map(({ libName }) => libName),
     'expoview',
   ];
 
@@ -298,32 +253,27 @@ exports.updateExpoViewAsync = async function updateExpoViewAsync(sdkVersion) {
   }
 
   await restoreFileAsync(constantsJava);
-  await restoreFileAsync(appBuildGradle);
   await restoreFileAsync(expoViewBuildGradle);
   await restoreFileAsync(multipleVersionReactNativeActivity);
 
   await spawnAsyncPrintCommand('rm', [
     '-rf',
     path.join(androidRoot, 'maven/host/exp/exponent/expoview'),
-    ...detachableUniversalModules.map(({ name, group }) =>
-      path.join(androidRoot, `maven/${group.replace(/\./g, '/')}/${name}`)
+    ...detachableUniversalModules.map(({ libName }) =>
+      path.join(androidRoot, `maven/host/exp/exponent/${libName}`)
     ),
   ]);
-  await spawnAsyncPrintCommand('mkdir', ['-p', path.join(androidRoot, 'maven/host/exp/exponent')]);
-  await spawnAsyncPrintCommand('mkdir', ['-p', path.join(androidRoot, 'maven/org/unimodules')]);
-
   await spawnAsyncPrintCommand('cp', [
     '-r',
     path.join(process.env.HOME, '/.m2/repository/host/exp/exponent/expoview'),
-    path.join(androidRoot, 'maven/host/exp/exponent/expoview'),
+    path.join(androidRoot, 'maven/host/exp/exponent'),
   ]);
 
-  for (const { name, group } of detachableUniversalModules) {
-    const groupPath = group.replace(/\./g, '/');
+  for (const { libName } of detachableUniversalModules) {
     await spawnAsyncPrintCommand('cp', [
       '-r',
-      path.join(process.env.HOME, `/.m2/repository/${groupPath}/${name}`),
-      path.join(androidRoot, `maven/${groupPath}/`),
+      path.join(process.env.HOME, `/.m2/repository/host/exp/exponent/${libName}`),
+      path.join(androidRoot, 'maven/host/exp/exponent/'),
     ]);
   }
 

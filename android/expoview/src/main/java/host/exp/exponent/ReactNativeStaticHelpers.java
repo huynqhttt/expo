@@ -15,12 +15,11 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
-import okhttp3.CookieJar;
-import okhttp3.OkHttpClient;
+import expolib_v1.okhttp3.CookieJar;
+import expolib_v1.okhttp3.OkHttpClient;
 import host.exp.exponent.analytics.EXL;
 import host.exp.exponent.network.ExponentNetwork;
 import host.exp.expoview.Exponent;
-import host.exp.exponent.ABIVersion;
 
 @DoNotStrip
 public class ReactNativeStaticHelpers {
@@ -106,47 +105,34 @@ public class ReactNativeStaticHelpers {
   }
 
   @DoNotStrip
-  public static Object getOkHttpClient(Class callingClass) {
+  public static OkHttpClient getOkHttpClient(Class callingClass) {
     String version = RNObject.versionForClassname(callingClass.getName());
     Object cookieJar = new RNObject("com.facebook.react.modules.network.ReactCookieJarContainer").loadVersion(version).construct().get();
 
-    if (ABIVersion.toNumber(version) >= ABIVersion.toNumber("33.0.0")) {
-      OkHttpClient.Builder client = new OkHttpClient.Builder()
-          .connectTimeout(0, TimeUnit.MILLISECONDS)
-          .readTimeout(0, TimeUnit.MILLISECONDS)
-          .writeTimeout(0, TimeUnit.MILLISECONDS)
-          .cookieJar((CookieJar) cookieJar)
-          .cache(sExponentNetwork.getCache());
+    OkHttpClient.Builder client = new OkHttpClient.Builder()
+        .connectTimeout(0, TimeUnit.MILLISECONDS)
+        .readTimeout(0, TimeUnit.MILLISECONDS)
+        .writeTimeout(0, TimeUnit.MILLISECONDS)
+        .cookieJar((CookieJar) cookieJar)
+        .cache(sExponentNetwork.getCache());
 
-      sExponentNetwork.addInterceptors(client);
+    sExponentNetwork.addInterceptors(client);
 
-      // pass the builder through MainApplication so that detached apps can customize it
-      try {
-        Method m = Class.forName("host.exp.exponent.MainApplication").getMethod("okHttpClientBuilder", OkHttpClient.Builder.class);
-        Object returnVal = m.invoke(null, client);
-        if (returnVal instanceof OkHttpClient.Builder) {
-          client = (OkHttpClient.Builder) returnVal;
-        } else {
-          throw new Exception("MainApplication.okHttpClientBuilder returned an object of type " + returnVal.getClass().getName());
-        }
-      } catch (NoSuchMethodException ex) {
-        // ignore this and fall back to previous client
-      } catch (Exception e) {
-        // just fall back to previous client
-        EXL.e(TAG, "Falling back to default OkHttpClient builder: " + e.getMessage());
+    // pass the builder through MainApplication so that detached apps can customize it
+    try {
+      Method m = Class.forName("host.exp.exponent.MainApplication").getMethod("okHttpClientBuilder", OkHttpClient.Builder.class);
+      Object returnVal = m.invoke(null, client);
+      if (returnVal instanceof OkHttpClient.Builder) {
+        client = (OkHttpClient.Builder) returnVal;
+      } else {
+        throw new Exception("MainApplication.okHttpClientBuilder returned an object of type " + returnVal.getClass().getName());
       }
-      return client.build();
-    } else { // TODO: Remove this case once SDK32 is phased out
-      expolib_v1.okhttp3.OkHttpClient.Builder client = new expolib_v1.okhttp3.OkHttpClient.Builder()
-          .connectTimeout(0, TimeUnit.MILLISECONDS)
-          .readTimeout(0, TimeUnit.MILLISECONDS)
-          .writeTimeout(0, TimeUnit.MILLISECONDS)
-          .cookieJar((expolib_v1.okhttp3.CookieJar) cookieJar)
-          .cache(sExponentNetwork.getExpolibOkhttpCacheForClient());
-
-      sExponentNetwork.addInterceptorsToPrefixedClient(client);
-
-      return client.build();
+    } catch (NoSuchMethodException ex) {
+      // ignore this and fall back to previous client
+    } catch (Exception e) {
+      // just fall back to previous client
+      EXL.e(TAG, "Falling back to default OkHttpClient builder: " + e.getMessage());
     }
+    return OkHttpClientProvider.enableTls12OnPreLollipop(client).build();
   }
 }

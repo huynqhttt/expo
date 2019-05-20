@@ -8,7 +8,7 @@ import java.util.List;
 
 import abi32_0_0.expo.core.interfaces.InternalModule;
 import abi32_0_0.expo.core.interfaces.Package;
-import org.unimodules.core.interfaces.SingletonModule;
+import expo.core.interfaces.SingletonModule;
 
 /**
  * Builder for {@link ModuleRegistry}. Override this class to add some custom

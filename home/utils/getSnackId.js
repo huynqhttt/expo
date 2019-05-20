@@ -1,4 +1,4 @@
-import Constants from 'expo-constants';
+import { Constants } from 'expo';
 import sha1 from 'sha1';
 
 let _snackId;

@@ -1,15 +1,15 @@
 // Copyright 2018-present 650 Industries. All rights reserved.
 
 #import <EXPermissions/EXReactNativeUserNotificationCenterProxy.h>
-#import <UMCore/UMUtilities.h>
+#import <EXCore/EXUtilities.h>
 
 @implementation EXReactNativeUserNotificationCenterProxy
 
-UM_REGISTER_MODULE();
+EX_REGISTER_MODULE();
 
 + (const NSArray<Protocol *> *)exportedInterfaces
 {
-  return @[@protocol(UMUserNotificationCenterProxyInterface)];
+  return @[@protocol(EXUserNotificationCenterProxyInterface)];
 }
 
 - (void)getNotificationSettingsWithCompletionHandler:(void(^)(UNNotificationSettings *settings))completionHandler

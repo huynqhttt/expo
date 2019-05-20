@@ -11,8 +11,5 @@
 
 @property (nonatomic, assign) BOOL tooltip;
 @property (nonatomic, copy) RCTBubblingEventBlock onPress;
-@property (nonatomic, assign) BOOL alphaHitTest;
-
-- (BOOL) isPointInside:(CGPoint)pointInCallout;
 
 @end

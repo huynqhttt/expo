@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) 2015-present, Facebook, Inc.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 
 import java.util.ArrayList;
 
-import com.facebook.infer.annotation.Assertions;
+import expolib_v1.com.facebook.infer.annotation.Assertions;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -75,7 +75,7 @@ import com.facebook.react.uimanager.UIManagerModuleListener;
 public class NativeAnimatedModule extends ReactContextBaseJavaModule implements
     LifecycleEventListener, UIManagerModuleListener {
 
-  public static final String NAME = "NativeAnimatedModule";
+  protected static final String NAME = "NativeAnimatedModule";
 
   private interface UIThreadOperation {
     void execute(NativeAnimatedNodesManager animatedNodesManager);

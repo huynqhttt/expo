@@ -7,6 +7,7 @@ const gulp = require('gulp');
 const shell = require('gulp-shell');
 const minimist = require('minimist');
 const path = require('path');
+const _ = require('lodash');
 const {
   ImageUtils,
   IosShellApp,
@@ -16,6 +17,7 @@ const {
   IosIPABuilder: createIPABuilder,
 } = require('xdl');
 
+const { startReactNativeServer } = require('./react-native-tasks');
 const logger = require('./logger');
 
 const ptool = './ptool';
@@ -183,3 +185,5 @@ gulp.task('ios:build-and-sign-ipa', buildAndSignIpaWithArguments);
 gulp.task('ptool', shell.task([`${ptool} ${_projects}`]));
 gulp.task('ptool:watch', gulp.series('ptool', 'watch'));
 gulp.task('ptool:pause-watch', gulp.series('watch:stop', 'ptool', 'watch'));
+
+gulp.task('react-native-server', startReactNativeServer);

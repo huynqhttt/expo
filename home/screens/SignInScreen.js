@@ -11,7 +11,7 @@ import Colors from '../constants/Colors';
 import CloseButton from '../components/CloseButton';
 import Form from '../components/Form';
 import PrimaryButton from '../components/PrimaryButton';
-import AuthApi from '../api/AuthApi';
+import Auth0Api from '../api/Auth0Api';
 import ApolloClient from '../api/ApolloClient';
 
 const DEBUG = false;
@@ -130,17 +130,21 @@ export default class SignInScreen extends React.Component {
     this.setState({ isLoading: true });
 
     try {
-      let result = await AuthApi.signInAsync(email, password);
+      let result = await Auth0Api.signInAsync(email, password);
       if (this._isMounted) {
-        let trackingOpts = {
-          id: result.id,
-          usernameOrEmail: email,
-        };
-        Analytics.identify(result.id, trackingOpts);
-        Analytics.track(Analytics.events.USER_LOGGED_IN, trackingOpts);
+        if (result.error) {
+          this._handleError(result);
+        } else {
+          let trackingOpts = {
+            id: result.id,
+            emailOrUsername: email,
+          };
+          Analytics.identify(result.id, trackingOpts);
+          Analytics.track(Analytics.events.USER_LOGGED_IN, trackingOpts);
 
-        ApolloClient.resetStore();
-        this.props.dispatch(SessionActions.setSession({ sessionSecret: result.sessionSecret }));
+          ApolloClient.resetStore();
+          this.props.dispatch(SessionActions.setSession({ sessionSecret: result.sessionSecret }));
+        }
       }
     } catch (e) {
       this._isMounted && this._handleError(e);
@@ -150,7 +154,8 @@ export default class SignInScreen extends React.Component {
   };
 
   _handleError = (error: Error) => {
-    let message = error.message || 'Sorry, something went wrong.';
+    console.log({ error });
+    let message = error.error_description || error.message || 'Sorry, something went wrong.';
     alert(message);
   };
 }

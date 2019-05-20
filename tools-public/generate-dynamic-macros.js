@@ -22,9 +22,7 @@ const ProjectVersions = require('./project-versions');
 
 const EXPONENT_DIR = process.env.EXPONENT_DIR || path.join(__dirname, '..');
 
-const { exp: { sdkVersion } } = require('../package.json');
-
-const EXPO_CLIENT_UNIVERSAL_MODULES = Modules.getAllNativeForExpoClientOnPlatform('ios', sdkVersion);
+const EXPO_CLIENT_UNIVERSAL_MODULES = Modules.getAllNativeForExpoClientOnPlatform('ios');
 
 // We need these permissions when testing but don't want them
 // ending up in our release.
@@ -34,13 +32,6 @@ const ANDROID_TEST_PERMISSIONS = `
 
 // some files are absent on turtle builders and we don't want log errors there
 const isTurtle = !!process.env.TURTLE_WORKING_DIR_PATH;
-
-const noop = () => null;
-const getManifestAsyncLogger = {
-  log: noop,
-  error: noop,
-  info: console.info,
-};
 
 async function getSavedDevHomeUrlAsync(platform) {
   let devHomeConfig = await new JsonFile(
@@ -124,7 +115,7 @@ const macrosFuncs = {
         'Exponent-Platform': platform,
         'Exponent-SDK-Version': sdkVersion,
         Accept: 'application/expo+json,application/json',
-      }, { logger: getManifestAsyncLogger });
+      });
     } catch (e) {
       const msg = `Unable to download manifest from ${savedDevHomeUrl}: ${e.message}`;
       console[isTurtle ? 'debug' : 'error'](msg);
@@ -149,7 +140,7 @@ const macrosFuncs = {
       manifest = await ExponentTools.getManifestAsync(url, {
         'Exponent-Platform': platform,
         Accept: 'application/expo+json,application/json',
-      }, { logger: getManifestAsyncLogger });
+      });
       if (manifest.name !== 'expo-home') {
         console.log(
           `Manifest at ${url} is not expo-home; using published kernel manifest instead...`

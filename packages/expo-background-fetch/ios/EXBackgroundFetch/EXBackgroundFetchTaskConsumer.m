@@ -2,13 +2,13 @@
 
 #import <EXBackgroundFetch/EXBackgroundFetch.h>
 #import <EXBackgroundFetch/EXBackgroundFetchTaskConsumer.h>
-#import <UMTaskManagerInterface/UMTaskInterface.h>
+#import <EXTaskManagerInterface/EXTaskInterface.h>
 
 @implementation EXBackgroundFetchTaskConsumer
 
-+ (BOOL)supportsLaunchReason:(UMTaskLaunchReason)launchReason
++ (BOOL)supportsLaunchReason:(EXTaskLaunchReason)launchReason
 {
-  return launchReason == UMTaskLaunchReasonBackgroundFetch;
+  return launchReason == EXTaskLaunchReasonBackgroundFetch;
 }
 
 - (NSString *)taskType
@@ -17,15 +17,9 @@
 }
 
 // Associating task to the consumer.
-- (void)didRegisterTask:(id<UMTaskInterface>)task
+- (void)didRegisterTask:(id<EXTaskInterface>)task
 {
   _task = task;
-  [self updateMinimumInterval];
-}
-
-- (void)setOptions:(NSDictionary *)options
-{
-  [self updateMinimumInterval];
 }
 
 // Method that is being called when the JS app just finished launching,
@@ -52,16 +46,6 @@
     default:
       return UIBackgroundFetchResultNoData;
   }
-}
-
-- (void)updateMinimumInterval
-{
-  NSNumber *interval = _task.options[@"minimumInterval"];
-  NSTimeInterval timeInterval = [interval doubleValue] ?: UIApplicationBackgroundFetchIntervalMinimum;
-
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [[UIApplication sharedApplication] setMinimumBackgroundFetchInterval:timeInterval];
-  });
 }
 
 @end

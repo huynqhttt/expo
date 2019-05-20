@@ -1,5 +1,5 @@
-import { EventEmitter } from '@unimodules/core';
-import { UnavailabilityError } from '@unimodules/core';
+import { EventEmitter } from 'expo-core';
+import { UnavailabilityError } from 'expo-errors';
 import ExpoTaskManager from './ExpoTaskManager';
 
 interface TaskError {
@@ -16,7 +16,7 @@ interface TaskBody {
   },
 }
 
-export interface RegisteredTask {
+interface RegisteredTask {
   taskName: string,
   taskType: string,
   options: any,

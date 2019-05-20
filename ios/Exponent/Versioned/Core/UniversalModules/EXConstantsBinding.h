@@ -2,9 +2,9 @@
 
 #import <Foundation/Foundation.h>
 #import <EXConstants/EXConstantsService.h>
-#import <UMConstantsInterface/UMConstantsInterface.h>
+#import <EXConstantsInterface/EXConstantsInterface.h>
 
-@interface EXConstantsBinding : EXConstantsService <UMInternalModule, UMConstantsInterface>
+@interface EXConstantsBinding : EXConstantsService <EXInternalModule, EXConstantsInterface>
 
 @property (nonatomic, readonly) NSString *appOwnership;
 

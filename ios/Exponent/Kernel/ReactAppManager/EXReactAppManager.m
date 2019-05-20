@@ -15,7 +15,7 @@
 #import "EXReactAppManager+Private.h"
 #import "EXVersionManager.h"
 #import "EXVersions.h"
-#import <UMCore/UMModuleRegistryProvider.h>
+#import <EXCore/EXModuleRegistryProvider.h>
 
 #import <React/RCTBridge.h>
 #import <React/RCTRootView.h>
@@ -288,7 +288,7 @@ typedef void (^SDK21RCTSourceLoadBlock)(NSError *error, NSData *source, int64_t 
                            @"isStandardDevMenuAllowed": @(isStandardDevMenuAllowed),
                            @"testEnvironment": @([EXEnvironment sharedEnvironment].testEnvironment),
                            @"services": [EXKernel sharedInstance].serviceRegistry.allServices,
-                           @"singletonModules": [UMModuleRegistryProvider singletonModules],
+                           @"singletonModules": [EXModuleRegistryProvider singletonModules],
                            @"moduleRegistryDelegateClass": RCTNullIfNil([self moduleRegistryDelegateClass]),
                            };
   return [self.versionManager extraModulesWithParams:params];

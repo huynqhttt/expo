@@ -1,6 +1,6 @@
 'use strict';
 
-import * as Speech from 'expo-speech';
+import { Speech } from 'expo';
 import { Platform } from 'react-native';
 
 import { waitFor } from './helpers';

@@ -1,6 +1,5 @@
+import { Platform, NativeModulesProxy } from 'expo-core';
 import * as TaskManager from 'expo-task-manager';
-import { UnavailabilityError } from '@unimodules/core';
-import { Platform, NativeModulesProxy } from '@unimodules/core';
 
 const { ExpoBackgroundFetch } = NativeModulesProxy;
 
@@ -16,41 +15,38 @@ enum BackgroundFetchStatus {
   Available = 3,
 }
 
-interface BackgroundFetchOptions {
-  minimumInterval?: number;
-  stopOnTerminate?: boolean;
-  startOnBoot?: boolean;
-}
-
 export async function getStatusAsync(): Promise<BackgroundFetchStatus | null> {
   if (Platform.OS !== 'ios') {
-    return BackgroundFetchStatus.Available;
+    return Promise.resolve(null);
   }
   return ExpoBackgroundFetch.getStatusAsync();
 }
 
 export async function setMinimumIntervalAsync(minimumInterval: number): Promise<void> {
   if (Platform.OS !== 'ios') {
+    console.warn(`expo-background-fetch is currently available only on iOS`);
     return;
   }
   await ExpoBackgroundFetch.setMinimumIntervalAsync(minimumInterval);
 }
 
-export async function registerTaskAsync(taskName: string, options: BackgroundFetchOptions = {}): Promise<void> {
-  if (!ExpoBackgroundFetch.registerTaskAsync) {
-    throw new UnavailabilityError('BackgroundFetch', 'registerTaskAsync')
+export async function registerTaskAsync(taskName: string): Promise<void> {
+  if (Platform.OS !== 'ios') {
+    console.warn(`expo-background-fetch is currently available only on iOS`);
+    return;
   }
   if (!TaskManager.isTaskDefined(taskName)) {
     throw new Error(
       `Task '${taskName}' is not defined. You must define a task using TaskManager.defineTask before registering.`
     );
   }
-  await ExpoBackgroundFetch.registerTaskAsync(taskName, options);
+  await ExpoBackgroundFetch.registerTaskAsync(taskName);
 }
 
 export async function unregisterTaskAsync(taskName: string): Promise<void> {
-  if (!ExpoBackgroundFetch.unregisterTaskAsync) {
-    throw new UnavailabilityError('BackgroundFetch', 'unregisterTaskAsync')
+  if (Platform.OS !== 'ios') {
+    console.warn(`expo-background-fetch is currently available only on iOS`);
+    return;
   }
   await ExpoBackgroundFetch.unregisterTaskAsync(taskName);
 }

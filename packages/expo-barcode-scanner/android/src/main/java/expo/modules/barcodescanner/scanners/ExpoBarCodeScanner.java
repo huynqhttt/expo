@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.unimodules.interfaces.barcodescanner.BarCodeScanner;
-import org.unimodules.interfaces.barcodescanner.BarCodeScannerSettings;
+import expo.interfaces.barcodescanner.BarCodeScanner;
+import expo.interfaces.barcodescanner.BarCodeScannerSettings;
 
 public abstract class ExpoBarCodeScanner implements BarCodeScanner {
 

@@ -16,7 +16,7 @@ import com.google.android.gms.tasks.Task;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.unimodules.core.Promise;
+import expo.core.Promise;
 
 public class Serialization {
 
@@ -49,6 +49,7 @@ public class Serialization {
         user.putString("photoURL", photoUrl != null ? photoUrl.toString() : null);
         user.putString("serverAuthCode", acct.getServerAuthCode());
         user.putBundle("auth", auth);
+        user.putString("serverAuthCode", acct.getServerAuthCode());
          // TODO: Bacon: If google ever surfaces this value, we should add it for parity with iOS
         user.putString("domain", null);
 

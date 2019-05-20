@@ -1,30 +1,25 @@
 // Copyright 2015-present 650 Industries. All rights reserved.
 
 #import <EXSensors/EXAccelerometer.h>
-#import <UMSensorsInterface/UMAccelerometerInterface.h>
+#import <EXSensorsInterface/EXAccelerometerInterface.h>
 
 @implementation EXAccelerometer
 
-UM_EXPORT_MODULE(ExponentAccelerometer);
+EX_EXPORT_MODULE(ExponentAccelerometer);
 
 - (const NSString *)updateEventName
 {
   return @"accelerometerDidUpdate";
 }
 
-- (id)getSensorServiceFromModuleRegistry:(UMModuleRegistry *)moduleRegistry
+- (id)getSensorServiceFromModuleRegistry:(EXModuleRegistry *)moduleRegistry
 {
-  return [moduleRegistry getModuleImplementingProtocol:@protocol(UMAccelerometerInterface)];
+  return [moduleRegistry getModuleImplementingProtocol:@protocol(EXAccelerometerInterface)];
 }
 
 - (void)setUpdateInterval:(double)updateInterval onSensorService:(id)sensorService
 {
   [sensorService setAccelerometerUpdateInterval:updateInterval];
-}
-
-- (BOOL)isAvailable:(id)sensorService
-{
-  return [sensorService isAccelerometerAvailable];
 }
 
 - (void)subscribeToSensorService:(id)sensorService withHandler:(void (^)(NSDictionary *event))handlerBlock

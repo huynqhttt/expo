@@ -10,9 +10,8 @@
 #import "RNBranchEventEmitter.h"
 #import "EXScopedModuleRegistry.h"
 #import "EXModuleRegistryBinding.h"
-#import "EXConstantsBinding.h"
 
-#import <UMConstantsInterface/UMConstantsInterface.h>
+#import <EXConstantsInterface/EXConstantsInterface.h>
 
 // EXPO CHANGES:
 // - Add #import "EXConstants.h"
@@ -221,7 +220,7 @@ EX_EXPORT_SCOPED_MODULE(RNBranch, BranchManager);
 - (void)setBridge:(RCTBridge *)bridge
 {
   _bridge = bridge;
-  EXConstantsBinding *constants = [_bridge.scopedModules.moduleRegistry getModuleImplementingProtocol:@protocol(UMConstantsInterface)];
+  id<EXConstantsInterface> constants = [_bridge.scopedModules.moduleRegistry getModuleImplementingProtocol:@protocol(EXConstantsInterface)];
 
   if ([constants.appOwnership isEqualToString:@"standalone"]) {
     _universalObjectMap = [RNBranchAgingDictionary dictionaryWithTtl:3600.0];

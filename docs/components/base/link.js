@@ -1,5 +1,7 @@
-import { css } from 'react-emotion';
+import styled, { keyframes, css } from 'react-emotion';
+import NextLink from 'next/link';
 
+import * as React from 'react';
 import * as Constants from '~/common/constants';
 
 const STYLES_INTERNAL_LINK = css`
@@ -11,6 +13,12 @@ const STYLES_INTERNAL_LINK = css`
     text-decoration: underline;
   }
 `;
+
+export const InternalLink = ({ href, as, children }) => (
+  <NextLink prefetch href={href} as={as}>
+    <a className={STYLES_INTERNAL_LINK}>{children}</a>
+  </NextLink>
+);
 
 const STYLES_EXTERNAL_LINK = css`
   text-decoration: none;

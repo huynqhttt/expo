@@ -7,7 +7,7 @@
 
 @implementation EXHeadlessAppLoader
 
-UM_REGISTER_APP_LOADER(react-native-experience);
+EX_REGISTER_APP_LOADER(react-native-experience);
 
 - (id<EXAppRecordInterface>)loadAppWithUrl:(NSString *)url options:(NSDictionary *)options callback:(void (^)(BOOL, NSError *))callback
 {

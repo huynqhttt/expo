@@ -33,7 +33,7 @@ export default class QRCodeButton extends React.Component {
   }
 
   _handlePressAsync = async () => {
-    Linking.openURL('https://docs.expo.io/versions/latest/introduction/installation/');
+    Linking.openURL('https://docs.expo.io/versions/latest/introduction/installation.html');
   };
 }
 

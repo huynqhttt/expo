@@ -3,9 +3,9 @@
 #import <EXBarCodeScanner/EXBarCodeScannerView.h>
 #import <EXBarCodeScanner/EXBarCodeScanner.h>
 #import <EXBarCodeScanner/EXBarCodeScannerUtils.h>
-#import <UMPermissionsInterface/UMPermissionsInterface.h>
-#import <UMCore/UMAppLifecycleService.h>
-#import <UMCore/UMUtilities.h>
+#import <EXPermissionsInterface/EXPermissionsInterface.h>
+#import <EXCore/EXAppLifecycleService.h>
+#import <EXCore/EXUtilities.h>
 
 @interface EXBarCodeScannerView ()
 
@@ -17,29 +17,29 @@
 @property (nonatomic, strong) id runtimeErrorHandlingObserver;
 @property (nonatomic, strong) EXBarCodeScanner *barCodeScanner;
 
-@property (nonatomic, weak) UMModuleRegistry *moduleRegistry;
-@property (nonatomic, weak) id<UMPermissionsInterface> permissionsManager;
-@property (nonatomic, weak) id<UMAppLifecycleService> lifecycleManager;
+@property (nonatomic, weak) EXModuleRegistry *moduleRegistry;
+@property (nonatomic, weak) id<EXPermissionsInterface> permissionsManager;
+@property (nonatomic, weak) id<EXAppLifecycleService> lifecycleManager;
 
 @property (nonatomic, assign, getter=isSessionPaused) BOOL paused;
 
-@property (nonatomic, copy) UMDirectEventBlock onCameraReady;
-@property (nonatomic, copy) UMDirectEventBlock onMountError;
-@property (nonatomic, copy) UMDirectEventBlock onBarCodeScanned;
+@property (nonatomic, copy) EXDirectEventBlock onCameraReady;
+@property (nonatomic, copy) EXDirectEventBlock onMountError;
+@property (nonatomic, copy) EXDirectEventBlock onBarCodeScanned;
 
 @end
 
 @implementation EXBarCodeScannerView
 
-- (instancetype)initWithModuleRegistry:(UMModuleRegistry *)moduleRegistry
+- (instancetype)initWithModuleRegistry:(EXModuleRegistry *)moduleRegistry
 {
   if ((self = [super init])) {
     _presetCamera = AVCaptureDevicePositionBack;
     _moduleRegistry = moduleRegistry;
     _session = [AVCaptureSession new];
     _sessionQueue = dispatch_queue_create("barCodeScannerQueue", DISPATCH_QUEUE_SERIAL);
-    _lifecycleManager = [moduleRegistry getModuleImplementingProtocol:@protocol(UMAppLifecycleListener)];
-    _permissionsManager = [moduleRegistry getModuleImplementingProtocol:@protocol(UMPermissionsInterface)];
+    _lifecycleManager = [moduleRegistry getModuleImplementingProtocol:@protocol(EXAppLifecycleListener)];
+    _permissionsManager = [moduleRegistry getModuleImplementingProtocol:@protocol(EXPermissionsInterface)];
     _barCodeScanner = [self createBarCodeScanner];
     
 #if !(TARGET_IPHONE_SIMULATOR)
@@ -92,9 +92,9 @@
     return;
   }
   _presetCamera = presetCamera;
-  UM_WEAKIFY(self);
+  EX_WEAKIFY(self);
   dispatch_async(_sessionQueue, ^{
-    UM_ENSURE_STRONGIFY(self);
+    EX_ENSURE_STRONGIFY(self);
     [self initializeSession];
   });
 }
@@ -131,9 +131,9 @@
 {
   if (![_session isRunning] && [self isSessionPaused]) {
     _paused = NO;
-    UM_WEAKIFY(self);
+    EX_WEAKIFY(self);
     dispatch_async(_sessionQueue, ^{
-      UM_ENSURE_STRONGIFY(self);
+      EX_ENSURE_STRONGIFY(self);
       [self.session startRunning];
     });
   }
@@ -143,9 +143,9 @@
 {
   if ([_session isRunning] && ![self isSessionPaused]) {
     _paused = YES;
-    UM_WEAKIFY(self);
+    EX_WEAKIFY(self);
     dispatch_async(_sessionQueue, ^{
-      UM_ENSURE_STRONGIFY(self);
+      EX_ENSURE_STRONGIFY(self);
       [self.session stopRunning];
     });
   }
@@ -161,10 +161,10 @@
 
 - (void)changePreviewOrientation:(UIInterfaceOrientation)orientation
 {
-  UM_WEAKIFY(self);
+  EX_WEAKIFY(self);
   AVCaptureVideoOrientation videoOrientation = [EXBarCodeScannerUtils videoOrientationForInterfaceOrientation:orientation];
-  [UMUtilities performSynchronouslyOnMainThread:^{
-    UM_ENSURE_STRONGIFY(self);
+  [EXUtilities performSynchronouslyOnMainThread:^{
+    EX_ENSURE_STRONGIFY(self);
     if (self.previewLayer.connection.isVideoOrientationSupported) {
       [self.previewLayer.connection setVideoOrientation:videoOrientation];
     }
@@ -190,14 +190,14 @@
   }
   
   __block UIInterfaceOrientation interfaceOrientation;
-  [UMUtilities performSynchronouslyOnMainThread:^{
+  [EXUtilities performSynchronouslyOnMainThread:^{
     interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
   }];
   AVCaptureVideoOrientation orientation = [EXBarCodeScannerUtils videoOrientationForInterfaceOrientation:interfaceOrientation];
   
-  UM_WEAKIFY(self);
+  EX_WEAKIFY(self);
   dispatch_async(_sessionQueue, ^{
-    UM_ENSURE_STRONGIFY(self);
+    EX_ENSURE_STRONGIFY(self);
     
     [self.session beginConfiguration];
     
@@ -241,9 +241,9 @@
     return;
   };
 
-  UM_WEAKIFY(self);
+  EX_WEAKIFY(self);
   dispatch_async(_sessionQueue, ^{
-    UM_ENSURE_STRONGIFY(self);
+    EX_ENSURE_STRONGIFY(self);
     
     if (self.presetCamera == AVCaptureDevicePositionUnspecified) {
       return;
@@ -254,9 +254,9 @@
                                                        object:self.session
                                                         queue:nil
                                                    usingBlock:^(NSNotification *note) {
-      UM_ENSURE_STRONGIFY(self);
+      EX_ENSURE_STRONGIFY(self);
       dispatch_async(self.sessionQueue, ^{
-        UM_ENSURE_STRONGIFY(self);
+        EX_ENSURE_STRONGIFY(self);
         // Manually restarting the session since it must have been stopped due to an error.
         [self.session startRunning];
         [self onReady];
@@ -275,9 +275,9 @@
 #if TARGET_IPHONE_SIMULATOR
   return;
 #endif
-  UM_WEAKIFY(self);
+  EX_WEAKIFY(self);
   dispatch_async(_sessionQueue, ^{
-    UM_ENSURE_STRONGIFY(self);
+    EX_ENSURE_STRONGIFY(self);
     
     [self.barCodeScanner stopBarCodeScanning];
     
@@ -301,9 +301,9 @@
   EXBarCodeScanner *barCodeScanner = [EXBarCodeScanner new];
   [barCodeScanner setSession:_session];
   [barCodeScanner setSessionQueue:_sessionQueue];
-  UM_WEAKIFY(self);
+  EX_WEAKIFY(self);
   [barCodeScanner setOnBarCodeScanned:^(NSDictionary *body) {
-    UM_ENSURE_STRONGIFY(self);
+    EX_ENSURE_STRONGIFY(self);
     [self onBarCodeScanned:body];
   }];
   [barCodeScanner setIsEnabled:true];

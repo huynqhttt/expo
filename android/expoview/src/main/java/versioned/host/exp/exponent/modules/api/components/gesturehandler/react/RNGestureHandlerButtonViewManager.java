@@ -60,19 +60,6 @@ public class RNGestureHandlerButtonViewManager extends
       mNeedBackgroundUpdate = true;
     }
 
-    private Drawable applyRippleEffectWhenNeeded(Drawable selectable) {
-      if (mRippleColor != null
-              && selectable != null
-              && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-              && selectable instanceof RippleDrawable) {
-        int[][] states = new int[][]{ new int[]{ android.R.attr.state_enabled } };
-        int[] colors = new int[]{ mRippleColor };
-        ColorStateList colorStateList = new ColorStateList(states, colors);
-        ((RippleDrawable) selectable).setColor(colorStateList);
-      }
-      return selectable;
-    }
-
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
       if (super.onInterceptTouchEvent(ev)) {
@@ -101,11 +88,11 @@ public class RNGestureHandlerButtonViewManager extends
         setForeground(null);
       }
       if (mUseForeground && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        setForeground(applyRippleEffectWhenNeeded(createSelectableDrawable()));
+        setForeground(createSelectableDrawable());
         if (mBackgroundColor != Color.TRANSPARENT) {
           setBackgroundColor(mBackgroundColor);
         }
-      } else if (mBackgroundColor == Color.TRANSPARENT && mRippleColor == null) {
+      } else if (mBackgroundColor == Color.TRANSPARENT) {
         setBackground(createSelectableDrawable());
       } else {
         PaintDrawable colorDrawable = new PaintDrawable(mBackgroundColor);
@@ -126,7 +113,14 @@ public class RNGestureHandlerButtonViewManager extends
             ((RippleDrawable) selectable).setDrawableByLayerId(android.R.id.mask, mask);
           }
         }
-        applyRippleEffectWhenNeeded(selectable);
+        if (mRippleColor != null
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+                && selectable instanceof RippleDrawable) {
+          int[][] states = new int[][] { new int[] { android.R.attr.state_enabled} };
+          int[] colors = new int[] { mRippleColor };
+          ColorStateList colorStateList = new ColorStateList(states, colors);
+          ((RippleDrawable) selectable).setColor(colorStateList);
+        }
         LayerDrawable layerDrawable = new LayerDrawable(
                 new Drawable[] { colorDrawable, selectable});
         setBackground(layerDrawable);

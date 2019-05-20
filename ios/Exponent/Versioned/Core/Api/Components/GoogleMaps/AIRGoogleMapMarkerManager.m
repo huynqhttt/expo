@@ -5,8 +5,6 @@
 //  Created by Gil Birman on 9/2/16.
 //
 
-#ifdef HAVE_GOOGLE_MAPS
-
 #import "AIRGoogleMapMarkerManager.h"
 #import "AIRGoogleMapMarker.h"
 #import <MapKit/MapKit.h>
@@ -25,8 +23,6 @@ RCT_EXPORT_MODULE()
 //  tapGestureRecognizer.cancelsTouchesInView = NO;
 //  [marker addGestureRecognizer:tapGestureRecognizer];
   marker.bridge = self.bridge;
-  marker.isAccessibilityElement = YES;
-  marker.accessibilityElementsHidden = NO;
   return marker;
 }
 
@@ -35,9 +31,7 @@ RCT_EXPORT_VIEW_PROPERTY(coordinate, CLLocationCoordinate2D)
 RCT_EXPORT_VIEW_PROPERTY(rotation, CLLocationDegrees)
 RCT_EXPORT_VIEW_PROPERTY(onPress, RCTBubblingEventBlock)
 RCT_REMAP_VIEW_PROPERTY(image, imageSrc, NSString)
-RCT_REMAP_VIEW_PROPERTY(icon, iconSrc, NSString)
 RCT_EXPORT_VIEW_PROPERTY(title, NSString)
-RCT_REMAP_VIEW_PROPERTY(testID, accessibilityIdentifier, NSString)
 RCT_REMAP_VIEW_PROPERTY(description, subtitle, NSString)
 RCT_EXPORT_VIEW_PROPERTY(pinColor, UIColor)
 RCT_EXPORT_VIEW_PROPERTY(anchor, CGPoint)
@@ -75,28 +69,6 @@ RCT_EXPORT_METHOD(hideCallout:(nonnull NSNumber *)reactTag)
   }];
 }
 
-RCT_EXPORT_METHOD(redrawCallout:(nonnull NSNumber *)reactTag)
-{
-    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
-        id view = viewRegistry[reactTag];
-        if (![view isKindOfClass:[AIRGoogleMapMarker class]]) {
-            RCTLogError(@"Invalid view returned from registry, expecting AIRMap, got: %@", view);
-        } else {
-            AIRGoogleMapMarker* marker = (AIRGoogleMapMarker *) view;
-            
-            [NSTimer scheduledTimerWithTimeInterval:0.0
-                                             target:[NSBlockOperation blockOperationWithBlock:^{
-                [marker hideCalloutView];
-                [marker showCalloutView];
-            }]
-                                           selector:@selector(main)
-                                           userInfo:nil
-                                            repeats:NO
-             ];
-        }
-    }];
-}
-
 RCT_EXPORT_METHOD(redraw:(nonnull NSNumber *)reactTag)
 {
   [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
@@ -109,5 +81,3 @@ RCT_EXPORT_METHOD(redraw:(nonnull NSNumber *)reactTag)
   }];
 }
 @end
-
-#endif

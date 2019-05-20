@@ -18,18 +18,18 @@ ABI31_0_0YGFlexDirection ABI31_0_0YGFlexDirectionCross(
 }
 
 float ABI31_0_0YGFloatMax(const float a, const float b) {
-  if (!ABI31_0_0yoga::isUndefined(a) && !ABI31_0_0yoga::isUndefined(b)) {
+  if (!yoga::isUndefined(a) && !yoga::isUndefined(b)) {
     return fmaxf(a, b);
   }
-  return ABI31_0_0yoga::isUndefined(a) ? b : a;
+  return yoga::isUndefined(a) ? b : a;
 }
 
 float ABI31_0_0YGFloatMin(const float a, const float b) {
-  if (!ABI31_0_0yoga::isUndefined(a) && !ABI31_0_0yoga::isUndefined(b)) {
+  if (!yoga::isUndefined(a) && !yoga::isUndefined(b)) {
     return fminf(a, b);
   }
 
-  return ABI31_0_0yoga::isUndefined(a) ? b : a;
+  return yoga::isUndefined(a) ? b : a;
 }
 
 bool ABI31_0_0YGValueEqual(const ABI31_0_0YGValue a, const ABI31_0_0YGValue b) {
@@ -38,7 +38,7 @@ bool ABI31_0_0YGValueEqual(const ABI31_0_0YGValue a, const ABI31_0_0YGValue b) {
   }
 
   if (a.unit == ABI31_0_0YGUnitUndefined ||
-      (ABI31_0_0yoga::isUndefined(a.value) && ABI31_0_0yoga::isUndefined(b.value))) {
+      (yoga::isUndefined(a.value) && yoga::isUndefined(b.value))) {
     return true;
   }
 
@@ -46,14 +46,14 @@ bool ABI31_0_0YGValueEqual(const ABI31_0_0YGValue a, const ABI31_0_0YGValue b) {
 }
 
 bool ABI31_0_0YGFloatsEqual(const float a, const float b) {
-  if (!ABI31_0_0yoga::isUndefined(a) && !ABI31_0_0yoga::isUndefined(b)) {
+  if (!yoga::isUndefined(a) && !yoga::isUndefined(b)) {
     return fabs(a - b) < 0.0001f;
   }
-  return ABI31_0_0yoga::isUndefined(a) && ABI31_0_0yoga::isUndefined(b);
+  return yoga::isUndefined(a) && yoga::isUndefined(b);
 }
 
 float ABI31_0_0YGFloatSanitize(const float& val) {
-  return ABI31_0_0yoga::isUndefined(val) ? 0 : val;
+  return yoga::isUndefined(val) ? 0 : val;
 }
 
 float ABI31_0_0YGUnwrapFloatOptional(const ABI31_0_0YGFloatOptional& op) {

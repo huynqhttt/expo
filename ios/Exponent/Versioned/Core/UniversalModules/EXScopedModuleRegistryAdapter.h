@@ -1,9 +1,9 @@
 // Copyright © 2018 650 Industries. All rights reserved.
 
-#import <UMReactNativeAdapter/UMModuleRegistryAdapter.h>
+#import <EXReactNativeAdapter/EXModuleRegistryAdapter.h>
 
-@interface EXScopedModuleRegistryAdapter : UMModuleRegistryAdapter
+@interface EXScopedModuleRegistryAdapter : EXModuleRegistryAdapter
 
-- (UMModuleRegistry *)moduleRegistryForParams:(NSDictionary *)params forExperienceId:(NSString *)experienceId withKernelServices:(NSDictionary *)kernelServices;
+- (NSArray<id<RCTBridgeModule>> *)extraModulesForParams:(NSDictionary *)params andExperience:(NSString *)experienceId withScopedModulesArray:(NSArray *)scopedModulesArray withKernelServices:(NSDictionary *)kernelServices;
 
 @end

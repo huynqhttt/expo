@@ -1,8 +1,8 @@
 // Copyright 2015-present 650 Industries. All rights reserved.
 
 #import <Foundation/Foundation.h>
-#import <UMFontInterface/UMFontProcessorInterface.h>
+#import <EXFontInterface/EXFontProcessorInterface.h>
 
-@interface EXFontLoaderProcessor : NSObject <UMFontProcessorInterface>
+@interface EXFontLoaderProcessor : NSObject <EXFontProcessorInterface>
 
 @end

@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 'use strict';
 
-const spawnSync = require('../common/cross-spawn-sync');
+const child_process = require('child_process');
 
 function checkWorkspaceDependencies() {
-  let workspacesInfo = getWorkspacesInfo();
+  let workspacesInfo = _getWorkspacesInfo();
   if (!workspacesInfo) {
     console.error(`Couldn't generate Yarn's workspace root information.`);
     return;
   }
 
-  let count = countMismatchedWorkspaceDependencies(workspacesInfo);
+  let count = _countMismatchedWorkspaceDependencies(workspacesInfo);
   if (count === 0) {
     console.log(`✅  Verified that all workspace dependencies are symlinked.`);
     return;
@@ -40,8 +40,8 @@ function checkWorkspaceDependencies() {
   }
 }
 
-function getWorkspacesInfo() {
-  let result = spawnSync('yarn', ['--silent', 'workspaces', 'info']);
+function _getWorkspacesInfo() {
+  let result = child_process.spawnSync('yarn', ['--silent', 'workspaces', 'info']);
 
   if (result.error) {
     console.error(`Could not run yarn: ${result.error.message}`);
@@ -82,7 +82,7 @@ function getWorkspacesInfo() {
   }
 }
 
-function countMismatchedWorkspaceDependencies(workspacesInfo) {
+function _countMismatchedWorkspaceDependencies(workspacesInfo) {
   let count = 0;
   for (let workspaceName in workspacesInfo) {
     count += workspacesInfo[workspaceName].mismatchedWorkspaceDependencies.length;

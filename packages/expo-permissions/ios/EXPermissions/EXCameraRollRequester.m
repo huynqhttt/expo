@@ -34,7 +34,7 @@
   };
 }
 
-- (void)requestPermissionsWithResolver:(UMPromiseResolveBlock)resolve rejecter:(UMPromiseRejectBlock)reject
+- (void)requestPermissionsWithResolver:(EXPromiseResolveBlock)resolve rejecter:(EXPromiseRejectBlock)reject
 {
   [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
     resolve([[self class] permissions]);

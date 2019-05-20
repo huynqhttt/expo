@@ -1,22 +1,21 @@
-export interface PrintOptions {
-  uri?: string;
+export type PrintOptions = {
+  uri: string;
   html?: string;
   printerUrl?: string;
   markupFormatterIOS?: string;
-  orientation?: string;
 };
 
-export interface Printer {
+export type SelectResult = {
   name: string;
   url: string;
 };
 
-export interface OrientationType {
+export type OrientationConstant = {
   portrait: string;
   landscape: string;
 };
 
-export interface FilePrintOptions {
+export type FilePrintOptions = {
   html?: string;
   width?: number;
   height?: number;
@@ -28,7 +27,7 @@ export interface FilePrintOptions {
   };
 };
 
-export interface FilePrintResult {
+export type FilePrintResult = {
   uri: string;
   numberOfPages: number;
 };

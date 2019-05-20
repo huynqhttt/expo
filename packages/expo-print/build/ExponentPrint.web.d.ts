@@ -1,7 +1,7 @@
-import { OrientationType } from './Print.types';
+import { OrientationConstant } from './Print.types';
 declare const _default: {
     readonly name: string;
-    readonly Orientation: OrientationType;
+    readonly Orientation: OrientationConstant;
     print(): Promise<void>;
     printToFileAsync(): Promise<void>;
 };

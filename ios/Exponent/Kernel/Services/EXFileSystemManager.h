@@ -1,7 +1,7 @@
 // Copyright 2015-present 650 Industries. All rights reserved.
 
 #import <UIKit/UIKit.h>
-#import "EXKernelService.h"
+#import <EXFileSystem/EXFileSystemManagerService.h>
 
 // Prior to SDK 29, EXFileSystem native module was registering with a dependency on EXFileSystemManager kernel service.
 // The purpose of this kernel service was to provide the module with bundle directory and bundled assets list.
@@ -19,10 +19,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface EXFileSystemManager : NSObject <EXKernelService>
-
-- (NSString *)bundleDirectoryForExperienceId:(NSString *)experienceId;
-- (NSArray<NSString *> *)bundledAssetsForExperienceId:(NSString *)experienceId;
+@interface EXFileSystemManager : EXFileSystemManagerService
 
 @end
 

@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.preserve_paths = 'EXGoogleSignIn/**/*.{h,m}'
   s.requires_arc   = true
 
-  s.dependency 'UMCore'
+  s.dependency 'EXCore'
   s.dependency 'GoogleSignIn', '~> 4.4'
 end
 

@@ -40,10 +40,6 @@
   [_kernelService sensorModuleDidSubscribeForMagnetometerUpdatesOfExperience:_experienceId withHandler:handlerBlock];
 }
 
-- (void)sensorModuleDidSubscribeForBarometerUpdates:(id)scopedSensorModule withHandler:(void (^)(NSDictionary *))handlerBlock {
-  [_kernelService sensorModuleDidSubscribeForBarometerUpdatesOfExperience:_experienceId withHandler:handlerBlock];
-}
-
 - (void)sensorModuleDidUnsubscribeForAccelerometerUpdates:(id)scopedSensorModule {
   [_kernelService sensorModuleDidUnsubscribeForAccelerometerUpdatesOfExperience:_experienceId];
 }
@@ -64,16 +60,8 @@
   [_kernelService sensorModuleDidUnsubscribeForMagnetometerUpdatesOfExperience:_experienceId];
 }
 
-- (void)sensorModuleDidUnsubscribeForBarometerUpdates:(id)scopedSensorModule {
-  [_kernelService sensorModuleDidUnsubscribeForBarometerUpdatesOfExperience:_experienceId];
-}
-
 - (void)setAccelerometerUpdateInterval:(NSTimeInterval)intervalMs {
   [_kernelService setAccelerometerUpdateInterval:intervalMs];
-}
-
-- (BOOL)isAccelerometerAvailable {
-  return [_kernelService isAccelerometerAvailable];
 }
 
 - (void)setDeviceMotionUpdateInterval:(NSTimeInterval)intervalMs {
@@ -84,45 +72,21 @@
   return [_kernelService getGravity];
 }
 
-- (BOOL)isDeviceMotionAvailable {
-  return [_kernelService isDeviceMotionAvailable];
-}
 
 - (void)setGyroscopeUpdateInterval:(NSTimeInterval)intervalMs {
   [_kernelService setGyroscopeUpdateInterval:intervalMs];
-}
-
-- (BOOL)isGyroAvailable {
-  return [_kernelService isGyroAvailable];
 }
 
 - (void)setMagnetometerUncalibratedUpdateInterval:(NSTimeInterval)intervalMs {
   [_kernelService setMagnetometerUncalibratedUpdateInterval:intervalMs];
 }
 
-- (BOOL)isMagnetometerUncalibratedAvailable {
-  return [_kernelService isMagnetometerUncalibratedAvailable];
-}
-
 - (void)setMagnetometerUpdateInterval:(NSTimeInterval)intervalMs {
   [_kernelService setMagnetometerUpdateInterval:intervalMs];
 }
 
-- (BOOL)isMagnetometerAvailable {
-  return [_kernelService isMagnetometerAvailable];
-}
-
-- (void)setBarometerUpdateInterval:(NSTimeInterval)intervalMs {
-  [_kernelService setBarometerUpdateInterval:intervalMs];
-}
-
-- (BOOL)isBarometerAvailable {
-  return [_kernelService isBarometerAvailable];
-}
-
-
 + (const NSArray<Protocol *> *)exportedInterfaces {
-  return @[@protocol(UMAccelerometerInterface), @protocol(UMBarometerInterface),  @protocol(UMDeviceMotionInterface), @protocol(UMGyroscopeInterface), @protocol(UMMagnetometerInterface), @protocol(UMMagnetometerUncalibratedInterface)];
+  return @[@protocol(EXAccelerometerInterface), @protocol(EXDeviceMotionInterface), @protocol(EXGyroscopeInterface), @protocol(EXMagnetometerInterface), @protocol(EXMagnetometerUncalibratedInterface)];
 }
 
 @end

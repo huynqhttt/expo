@@ -1,1 +1,1 @@
-../../../../FBAudienceNetwork/Static/FBAudienceNetwork.framework/Headers/FBNativeAdsManager.h
+../../../../FBAudienceNetwork/FBAudienceNetwork.framework/Headers/FBNativeAdsManager.h

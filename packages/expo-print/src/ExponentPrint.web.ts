@@ -1,10 +1,10 @@
-import { OrientationType } from './Print.types';
+import { OrientationConstant } from './Print.types';
 
 export default {
   get name(): string {
     return 'ExponentPrint';
   },
-  get Orientation(): OrientationType {
+  get Orientation(): OrientationConstant {
     return {
       portrait: 'portrait',
       landscape: 'landscape',

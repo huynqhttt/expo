@@ -1,4 +1,4 @@
-import { EventEmitter, Subscription } from '@unimodules/core';
+import { EventEmitter, Subscription } from 'expo-core';
 declare type Listener<E> = (event: E) => void;
 declare type NativeSensorModule = any;
 /**
@@ -17,6 +17,5 @@ export default class DeviceSensor<M> {
     removeAllListeners(): void;
     removeSubscription(subscription: Subscription): void;
     setUpdateInterval(intervalMs: number): void;
-    isAvailableAsync(): Promise<boolean>;
 }
 export {};

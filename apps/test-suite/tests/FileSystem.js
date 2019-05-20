@@ -1,23 +1,25 @@
 'use strict';
 
-import { Asset } from 'expo-asset';
-import * as FS from 'expo-file-system';
+import { FileSystem as FS, Asset } from 'expo';
 
 export const name = 'FileSystem';
 
-export async function test(t) {
+export function test(t) {
   t.describe('FileSystem', () => {
     const throws = async run => {
       let error = null;
       try {
         await run();
       } catch (e) {
+        // Uncomment to log error message.
+        // const func = run.toString().match(/[A-Za-z]+\(/)[0].slice(0, -1);
+        // console.log(`${func}: ${e.message}`);
         error = e;
       }
       t.expect(error).toBeTruthy();
     };
 
-    t.it(
+    /*t.it(
       'delete(idempotent) -> !exists -> download(md5, uri) -> exists ' + '-> delete -> !exists',
       async () => {
         const localUri = FS.documentDirectory + 'download1.png';
@@ -34,7 +36,11 @@ export async function test(t) {
         await FS.deleteAsync(localUri, { idempotent: true });
         await assertExists(false);
 
-        const { md5, headers } = await FS.downloadAsync(
+        const {
+          md5,
+          uri,
+          headers,
+        } = await FS.downloadAsync(
           'https://s3-us-west-1.amazonaws.com/test-suite-data/avatar2.png',
           localUri,
           { md5: true }
@@ -47,7 +53,7 @@ export async function test(t) {
         await assertExists(false);
       },
       9000
-    );
+    );*/
 
     t.it('Can read/write Base64', async () => {
       const asset = await Asset.fromModule(require('../assets/icons/app.png'));
@@ -55,7 +61,7 @@ export async function test(t) {
 
       for (let startingPosition = 0; startingPosition < 3; startingPosition++) {
         const options = {
-          encoding: FS.EncodingType.Base64,
+          encoding: FS.EncodingTypes.Base64,
           position: startingPosition,
           length: startingPosition + 1,
         };
@@ -67,9 +73,9 @@ export async function test(t) {
 
         const localUri = FS.documentDirectory + 'b64.png';
 
-        await FS.writeAsStringAsync(localUri, b64, { encoding: FS.EncodingType.Base64 });
+        await FS.writeAsStringAsync(localUri, b64, { encoding: FS.EncodingTypes.Base64 });
 
-        t.expect(await FS.readAsStringAsync(localUri, { encoding: FS.EncodingType.Base64 })).toBe(
+        t.expect(await FS.readAsStringAsync(localUri, { encoding: FS.EncodingTypes.Base64 })).toBe(
           b64
         );
       }
@@ -89,12 +95,15 @@ export async function test(t) {
       t.expect(error.message).toMatch(/not.*found/);
     });
 
-    t.it(
+    /*t.it(
       'download(md5, uri) -> read -> delete -> !exists -> read[error]',
       async () => {
         const localUri = FS.documentDirectory + 'download1.txt';
 
-        const { md5 } = await FS.downloadAsync(
+        const {
+          md5,
+          uri,
+        } = await FS.downloadAsync(
           'https://s3-us-west-1.amazonaws.com/test-suite-data/text-file.txt',
           localUri,
           { md5: true }
@@ -115,7 +124,7 @@ export async function test(t) {
         t.expect(error).toBeTruthy();
       },
       9000
-    );
+    );*/
 
     t.it('delete(idempotent) -> !exists -> write -> read -> write -> read', async () => {
       const localUri = FS.documentDirectory + 'write1.txt';
@@ -242,26 +251,12 @@ export async function test(t) {
         }
         t.expect(error).toBeTruthy();
 
-        error = null;
-        try {
-          await FS.makeDirectoryAsync(dir, {
-            intermediates: true,
-          });
-        } catch (e) {
-          error = e;
-        }
-        t.expect(error).toBe(null);
-
         await FS.writeAsStringAsync(path, contents);
 
         t.expect(await FS.readAsStringAsync(path)).toBe(contents);
       }
     );
 
-    /*
-    This test fails in CI because of an exception being thrown by deleteAsync in the nativeModule.
-    I traced it down to the FileUtils.forceDelete call here:
-    https://github.com/expo/expo/blob/bcd136b096df84e0b0f72a15acbda45491de8201/packages/expo-file-system/android/src/main/java/expo/modules/filesystem/FileSystemModule.java#L294
     t.it(
       'delete(dir, idempotent) -> make tree -> check contents ' +
         '-> check directory listings' +
@@ -330,7 +325,6 @@ export async function test(t) {
         await checkRoot(FS.documentDirectory + 'copied');
       }
     );
-    */
 
     t.it(
       'delete(idempotent) -> download(md5) -> getInfo(size)',
@@ -390,6 +384,39 @@ export async function test(t) {
       await FS.readDirectoryAsync(FS.cacheDirectory);
     });
 
+    /*t.it('can copy from `CameraRoll`, verify hash, other methods restricted', async () => {
+      await Promise.all(
+        (await CameraRoll.getPhotos({
+          first: 1,
+        })).edges.map(async ({ node: { image: { uri: cameraRollUri } } }) => {
+          const destinationUri = FS.documentDirectory + 'photo.jpg';
+
+          await throws(() => FS.readAsStringAsync(cameraRollUri));
+          await throws(() => FS.writeAsStringAsync(cameraRollUri));
+          await throws(() => FS.deleteAsync(cameraRollUri));
+          await throws(() => FS.moveAsync({ from: cameraRollUri, to: destinationUri }));
+          await throws(() => FS.copyAsync({ from: destinationUri, to: cameraRollUri }));
+          await throws(() => FS.makeDirectoryAsync(cameraRollUri));
+          await throws(() => FS.readDirectoryAsync(cameraRollUri));
+          await throws(() => FS.downloadAsync('http://www.google.com', cameraRollUri));
+
+          await FS.copyAsync({ from: cameraRollUri, to: destinationUri });
+
+          const origInfo = await FS.getInfoAsync(cameraRollUri, {
+            size: true,
+            md5: true,
+          });
+          const copyInfo = await FS.getInfoAsync(destinationUri, {
+            size: true,
+            md5: true,
+          });
+
+          t.expect(origInfo.md5).toEqual(copyInfo.md5);
+          t.expect(origInfo.size).toEqual(copyInfo.size);
+        })
+      );
+    });*/
+
     t.it(
       'download(network failure)',
       async () => {
@@ -409,7 +436,11 @@ export async function test(t) {
 
         let error;
         try {
-          await FS.downloadAsync('https://nonexistent-subdomain.expo.io', localUri, { md5: true });
+          const { md5, uri } = await FS.downloadAsync(
+            'https://nonexistent-subdomain.expo.io',
+            localUri,
+            { md5: true }
+          );
         } catch (e) {
           error = e;
         }
@@ -437,7 +468,7 @@ export async function test(t) {
         await FS.deleteAsync(localUri, { idempotent: true });
         await assertExists(false);
 
-        const { status } = await FS.downloadAsync('https://expo.io/404', localUri, {
+        const { md5, uri, status } = await FS.downloadAsync('https://expo.io/404', localUri, {
           md5: true,
         });
         await assertExists(true);
@@ -445,34 +476,6 @@ export async function test(t) {
 
         await FS.deleteAsync(localUri);
         await assertExists(false);
-      },
-      30000
-    );
-
-    t.it(
-      'download(nonexistent local path)',
-      async () => {
-        try {
-          const remoteUrl = 'https://s3-us-west-1.amazonaws.com/test-suite-data/avatar2.png';
-          const localUri = FS.documentDirectory + 'doesnt/exists/download1.png';
-          await FS.downloadAsync(remoteUrl, localUri);
-        } catch (err) {
-          t.expect(err.message).toMatch(/Directory for .* doesn't exist/);
-        }
-      },
-      30000
-    );
-
-    t.it(
-      'mkdir(multi-level) + download(multi-level local path)',
-      async () => {
-        const remoteUrl = 'https://s3-us-west-1.amazonaws.com/test-suite-data/avatar2.png';
-        const localDirUri = FS.documentDirectory + 'foo/bar/baz';
-        const localFileUri = localDirUri + 'download1.png';
-
-        await FS.makeDirectoryAsync(localDirUri, { intermediates: true });
-
-        await FS.downloadAsync(remoteUrl, localFileUri);
       },
       30000
     );

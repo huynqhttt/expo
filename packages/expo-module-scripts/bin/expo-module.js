@@ -7,7 +7,6 @@ const process = require('process');
 commander
   // Common scripts
   .command('configure', `Generate common configuration files`)
-  .command('readme', `Generate README`)
   .command(
     'typecheck',
     `Type check the source TypeScript without emitting JS and watch for file changes`
@@ -17,6 +16,7 @@ commander
   .command('clean', `Removes compiled files`)
 
   // Lifecycle scripts
+  .command('postinstall', `Scripts to run during the "postinstall" phase`)
   .command('prepare', `Scripts to run during the "prepare" phase`)
   .command('prepublishOnly', `Scripts to run during the "prepublishOnly" phase`)
 

@@ -6,11 +6,7 @@
 #import "EXKernel.h"
 #import "ExpoKit.h"
 
-#define HAS_AMPLITUDE __has_include(<Amplitude-iOS/Amplitude.h>)
-
-#if HAS_AMPLITUDE
-#import <Amplitude-iOS/Amplitude.h>
-#endif
+#import "Amplitude.h"
 
 @import UIKit;
 
@@ -41,7 +37,6 @@
   if ([self _isAnalyticsDisabled]) {
     return;
   }
-  #if HAS_AMPLITUDE
   if ([EXBuildConstants sharedInstance].isDevKernel) {
     if ([ExpoKit sharedInstance].applicationKeys[@"AMPLITUDE_DEV_KEY"]) {
       [[Amplitude instance] initializeApiKey:[ExpoKit sharedInstance].applicationKeys[@"AMPLITUDE_DEV_KEY"]];
@@ -51,7 +46,6 @@
       [[Amplitude instance] initializeApiKey:[ExpoKit sharedInstance].applicationKeys[@"AMPLITUDE_KEY"]];
     }
   }
-  #endif
 }
 
 + (BOOL)_isAnalyticsDisabled
@@ -130,9 +124,7 @@
     // if not detached, and some other event besides LOAD_EXPERIENCE, omit
     return;
   }
-  #if HAS_AMPLITUDE
   [[Amplitude instance] logEvent:eventId withEventProperties:props];
-  #endif
 }
 
 - (void)setVisibleRoute:(EXKernelRoute)route

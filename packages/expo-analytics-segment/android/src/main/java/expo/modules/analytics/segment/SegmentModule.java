@@ -4,22 +4,26 @@ package expo.modules.analytics.segment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.segment.analytics.Analytics;
 import com.segment.analytics.Options;
 import com.segment.analytics.Properties;
 import com.segment.analytics.Traits;
-import com.segment.analytics.android.integrations.firebase.FirebaseIntegration;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
-import org.unimodules.core.ExportedModule;
-import org.unimodules.core.ModuleRegistry;
-import org.unimodules.core.Promise;
-import org.unimodules.core.interfaces.ExpoMethod;
-import org.unimodules.core.interfaces.ModuleRegistryConsumer;
-import org.unimodules.interfaces.constants.ConstantsInterface;
+import expo.core.ExportedModule;
+import expo.core.ModuleRegistry;
+import expo.core.Promise;
+import expo.core.interfaces.ExpoMethod;
+import expo.core.interfaces.ModuleRegistryConsumer;
+import expo.interfaces.constants.ConstantsInterface;
 
 public class SegmentModule extends ExportedModule implements ModuleRegistryConsumer {
   private static final String NAME = "ExponentSegment";
@@ -116,7 +120,6 @@ public class SegmentModule extends ExportedModule implements ModuleRegistryConsu
   public void initializeAndroid(final String writeKey, Promise promise) {
     Analytics.Builder builder = new Analytics.Builder(mContext, writeKey);
     builder.tag(Integer.toString(sCurrentTag++));
-    builder.use(FirebaseIntegration.FACTORY);
     mClient = builder.build();
     mClient.optOut(!getEnabledPreferenceValue());
     promise.resolve(null);

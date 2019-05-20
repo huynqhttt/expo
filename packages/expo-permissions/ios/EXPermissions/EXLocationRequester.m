@@ -1,7 +1,7 @@
 // Copyright 2016-present 650 Industries. All rights reserved.
 
 #import <EXPermissions/EXLocationRequester.h>
-#import <UMCore/UMUtilities.h>
+#import <EXCore/EXUtilities.h>
 
 #import <objc/message.h>
 #import <CoreLocation/CLLocationManager.h>
@@ -13,8 +13,8 @@ static SEL whenInUseAuthorizationSelector;
 @interface EXLocationRequester () <CLLocationManagerDelegate>
 
 @property (nonatomic, strong) CLLocationManager *locMgr;
-@property (nonatomic, strong) UMPromiseResolveBlock resolve;
-@property (nonatomic, strong) UMPromiseRejectBlock reject;
+@property (nonatomic, strong) EXPromiseResolveBlock resolve;
+@property (nonatomic, strong) EXPromiseRejectBlock reject;
 @property (nonatomic, weak) id<EXPermissionRequesterDelegate> delegate;
 
 @end
@@ -34,7 +34,7 @@ static SEL whenInUseAuthorizationSelector;
   
   CLAuthorizationStatus systemStatus;
   if (![self isConfiguredForAlwaysAuthorization] && ![self isConfiguredForWhenInUseAuthorization]) {
-    UMFatal(UMErrorWithMessage(@"This app is missing usage descriptions, so location services will fail. Add one of the `NSLocation*UsageDescription` keys to your bundle's Info.plist. See https://bit.ly/2P5fEbG (https://docs.expo.io/versions/latest/guides/app-stores.html#system-permissions-dialogs-on-ios) for more information."));
+    EXFatal(EXErrorWithMessage(@"This app is missing usage descriptions, so location services will fail. Add one of the `NSLocation*UsageDescription` keys to your bundle's Info.plist. See https://bit.ly/2P5fEbG (https://docs.expo.io/versions/latest/guides/app-stores.html#system-permissions-dialogs-on-ios) for more information."));
     systemStatus = kCLAuthorizationStatusDenied;
   } else {
     systemStatus = [CLLocationManager authorizationStatus];
@@ -70,7 +70,7 @@ static SEL whenInUseAuthorizationSelector;
            };
 }
 
-- (void)requestPermissionsWithResolver:(UMPromiseResolveBlock)resolve rejecter:(UMPromiseRejectBlock)reject
+- (void)requestPermissionsWithResolver:(EXPromiseResolveBlock)resolve rejecter:(EXPromiseRejectBlock)reject
 {
   NSDictionary *existingPermissions = [[self class] permissions];
   if (existingPermissions && ![existingPermissions[@"status"] isEqualToString:[EXPermissions permissionStringForStatus:EXPermissionStatusUndetermined]]) {
@@ -85,7 +85,7 @@ static SEL whenInUseAuthorizationSelector;
     _reject = reject;
 
     __weak typeof(self) weakSelf = self;
-    [UMUtilities performSynchronouslyOnMainThread:^{
+    [EXUtilities performSynchronouslyOnMainThread:^{
       weakSelf.locMgr = [[CLLocationManager alloc] init];
       weakSelf.locMgr.delegate = weakSelf;
     }];

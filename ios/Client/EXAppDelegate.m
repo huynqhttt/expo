@@ -8,11 +8,27 @@
 #import <Crashlytics/Crashlytics.h>
 #import <Fabric/Fabric.h>
 #import <EXTaskManager/EXTaskService.h>
-#import <UMCore/UMModuleRegistryProvider.h>
+#import <EXCore/EXModuleRegistryProvider.h>
 
 #import "ExpoKit.h"
 #import "EXRootViewController.h"
 #import "EXConstants.h"
+
+#if __has_include(<EXAppAuth/EXAppAuth.h>)
+#import <EXAppAuth/EXAppAuth.h>
+#endif
+
+#if __has_include(<ABI32_0_0EXAppAuth/ABI32_0_0EXAppAuth.h>)
+#import <ABI32_0_0EXAppAuth/ABI32_0_0EXAppAuth.h>
+#endif
+
+#if __has_include(<GoogleSignIn/GoogleSignIn.h>)
+#import <GoogleSignIn/GoogleSignIn.h>
+#endif
+
+#if __has_include(<ABI32_0_0GoogleSignIn/ABI32_0_0GoogleSignIn.h>)
+#import <GoogleSignIn/GoogleSignIn.h>
+#endif
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -21,8 +37,6 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @implementation EXAppDelegate
-
-@synthesize window = _window;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(nullable NSDictionary *)launchOptions
 {
@@ -34,17 +48,13 @@ NS_ASSUME_NONNULL_BEGIN
     // App launched in foreground
     [self _setUpUserInterfaceForApplication:application withLaunchOptions:launchOptions];
   }
-
- [super application:application didFinishLaunchingWithOptions:launchOptions];
-
+  [(EXTaskService *)[EXModuleRegistryProvider getSingletonModuleForClass:EXTaskService.class] applicationDidFinishLaunchingWithOptions:launchOptions];
   return YES;
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
   [self _setUpUserInterfaceForApplication:application withLaunchOptions:nil];
-
-  [super applicationWillEnterForeground:application];
 }
 
 - (void)_setUpUserInterfaceForApplication:(UIApplication *)application withLaunchOptions:(nullable NSDictionary *)launchOptions
@@ -63,10 +73,67 @@ NS_ASSUME_NONNULL_BEGIN
   [_window makeKeyAndVisible];
 }
 
-// TODO: Remove once SDK31 is phased out
-- (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(nonnull UIUserNotificationSettings *)notificationSettings
+#pragma mark - Background Fetch
+
+- (void)application:(UIApplication *)application performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 {
-  [[ExpoKit sharedInstance] application:application didRegisterUserNotificationSettings:notificationSettings];
+  [(EXTaskService *)[EXModuleRegistryProvider getSingletonModuleForClass:EXTaskService.class] runTasksWithReason:EXTaskLaunchReasonBackgroundFetch userInfo:nil completionHandler:completionHandler];
+}
+
+#pragma mark - Handling URLs
+
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
+{
+  id annotation = options[UIApplicationOpenURLOptionsAnnotationKey];
+  NSString *sourceApplication = options[UIApplicationOpenURLOptionsSourceApplicationKey];
+#if __has_include(<GoogleSignIn/GoogleSignIn.h>)
+  if ([[GIDSignIn sharedInstance] handleURL:url
+                          sourceApplication:sourceApplication
+                                 annotation:annotation]) {
+    return YES;
+  }
+#endif
+#if __has_include(<ABI32_0_0GoogleSignIn/ABI32_0_0GoogleSignIn.h>)
+  if ([[ABI32_0_0GIDSignIn sharedInstance] handleURL:url
+                          sourceApplication:sourceApplication
+                                 annotation:annotation]) {
+    return YES;
+  }
+#endif
+#if __has_include(<EXAppAuth/EXAppAuth.h>)
+  if ([[EXAppAuth instance] application:app openURL:url options:options]) {
+    return YES;
+  }
+#endif
+#if __has_include(<ABI32_0_0EXAppAuth/ABI32_0_0EXAppAuth.h>)
+  if ([[ABI32_0_0EXAppAuth instance] application:app openURL:url options:options]) {
+    return YES;
+  }
+#endif
+  return [[ExpoKit sharedInstance] application:app openURL:url sourceApplication:sourceApplication annotation:annotation];
+}
+
+- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler
+{
+  return [[ExpoKit sharedInstance] application:application continueUserActivity:userActivity restorationHandler:restorationHandler];
+}
+
+#pragma mark - Notifications
+
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)token
+{
+  [[ExpoKit sharedInstance] application:application didRegisterForRemoteNotificationsWithDeviceToken:token];
+}
+
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)err
+{
+  [[ExpoKit sharedInstance] application:application didFailToRegisterForRemoteNotificationsWithError:err];
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler
+{
+  [[ExpoKit sharedInstance] application:application didReceiveRemoteNotification:userInfo fetchCompletionHandler:completionHandler];
+  [(EXTaskService *)[EXModuleRegistryProvider getSingletonModuleForClass:EXTaskService.class] runTasksWithReason:EXTaskLaunchReasonRemoteNotification userInfo:userInfo completionHandler:completionHandler];
 }
 
 @end

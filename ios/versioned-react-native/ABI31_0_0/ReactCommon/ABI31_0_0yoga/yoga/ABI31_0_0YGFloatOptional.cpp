@@ -14,7 +14,7 @@
 using namespace facebook;
 
 ABI31_0_0YGFloatOptional::ABI31_0_0YGFloatOptional(float value) {
-  if (ABI31_0_0yoga::isUndefined(value)) {
+  if (yoga::isUndefined(value)) {
     isUndefined_ = true;
     value_ = 0;
   } else {
@@ -44,7 +44,7 @@ bool ABI31_0_0YGFloatOptional::operator!=(const ABI31_0_0YGFloatOptional& op) co
 }
 
 bool ABI31_0_0YGFloatOptional::operator==(float val) const {
-  if (ABI31_0_0yoga::isUndefined(val) == isUndefined_) {
+  if (yoga::isUndefined(val) == isUndefined_) {
     return isUndefined_ || val == value_;
   }
   return false;

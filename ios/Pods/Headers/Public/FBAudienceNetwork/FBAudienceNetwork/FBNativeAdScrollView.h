@@ -1,1 +1,1 @@
-../../../../FBAudienceNetwork/Static/FBAudienceNetwork.framework/Headers/FBNativeAdScrollView.h
+../../../../FBAudienceNetwork/FBAudienceNetwork.framework/Headers/FBNativeAdScrollView.h

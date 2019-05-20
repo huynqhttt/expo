@@ -1,3 +1,3 @@
-import { NativeModulesProxy } from '@unimodules/core';
+import { NativeModulesProxy } from 'expo-core';
 
 export default NativeModulesProxy.ExpoAdsAdMobRewardedVideoAdManager;

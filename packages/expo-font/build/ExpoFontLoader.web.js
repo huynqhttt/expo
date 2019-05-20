@@ -1,4 +1,3 @@
-import FontObserver from 'fontfaceobserver';
 export default {
     get name() {
         return 'ExpoFontLoader';
@@ -10,7 +9,7 @@ export default {
         }
         const style = _createWebStyle(fontFamilyName, resource);
         document.head.appendChild(style);
-        return new FontObserver(fontFamilyName).load();
+        return Promise.resolve();
     },
 };
 function _createWebStyle(fontFamily, resource) {

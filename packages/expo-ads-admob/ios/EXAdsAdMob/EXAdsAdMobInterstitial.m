@@ -1,6 +1,6 @@
-#import <UMCore/UMUIManager.h>
-#import <UMCore/UMEventEmitterService.h>
-#import <UMCore/UMUtilitiesInterface.h>
+#import <EXCore/EXUIManager.h>
+#import <EXCore/EXEventEmitterService.h>
+#import <EXCore/EXUtilitiesInterface.h>
 #import <EXAdsAdMob/EXAdsAdMobInterstitial.h>
 
 static NSString *const EXAdsAdMobInterstitialDidLoad = @"interstitialDidLoad";
@@ -11,8 +11,8 @@ static NSString *const EXAdsAdMobInterstitialWillLeaveApplication = @"interstiti
 
 @interface EXAdsAdMobInterstitial ()
 
-@property (nonatomic, weak) id<UMEventEmitterService> eventEmitter;
-@property (nonatomic, weak) id<UMUtilitiesInterface> utilities;
+@property (nonatomic, weak) id<EXEventEmitterService> eventEmitter;
+@property (nonatomic, weak) id<EXUtilitiesInterface> utilities;
 
 @end
 
@@ -21,17 +21,17 @@ static NSString *const EXAdsAdMobInterstitialWillLeaveApplication = @"interstiti
   NSString *_adUnitID;
   bool _hasListeners;
   NSString *_testDeviceID;
-  UMPromiseResolveBlock _showAdResolver;
-  UMPromiseResolveBlock _requestAdResolver;
-  UMPromiseRejectBlock _requestAdRejecter;
+  EXPromiseResolveBlock _showAdResolver;
+  EXPromiseResolveBlock _requestAdResolver;
+  EXPromiseRejectBlock _requestAdRejecter;
 }
 
-UM_EXPORT_MODULE(ExpoAdsAdMobInterstitialManager);
+EX_EXPORT_MODULE(ExpoAdsAdMobInterstitialManager);
 
-- (void)setModuleRegistry:(UMModuleRegistry *)moduleRegistry
+- (void)setModuleRegistry:(EXModuleRegistry *)moduleRegistry
 {
-  _utilities = [moduleRegistry getModuleImplementingProtocol:@protocol(UMUtilitiesInterface)];
-  _eventEmitter = [moduleRegistry getModuleImplementingProtocol:@protocol(UMEventEmitterService)];
+  _utilities = [moduleRegistry getModuleImplementingProtocol:@protocol(EXUtilitiesInterface)];
+  _eventEmitter = [moduleRegistry getModuleImplementingProtocol:@protocol(EXEventEmitterService)];
 }
 
 - (NSArray<NSString *> *)supportedEvents
@@ -59,27 +59,27 @@ UM_EXPORT_MODULE(ExpoAdsAdMobInterstitialManager);
   _hasListeners = NO;
 }
 
-UM_EXPORT_METHOD_AS(setAdUnitID,
+EX_EXPORT_METHOD_AS(setAdUnitID,
                     setAdUnitID:(NSString *)adUnitID
-                    resolver:(UMPromiseResolveBlock)resolve
-                    rejecter:(UMPromiseRejectBlock)reject)
+                    resolver:(EXPromiseResolveBlock)resolve
+                    rejecter:(EXPromiseRejectBlock)reject)
 {
   _adUnitID = adUnitID;
   resolve(nil);
 }
 
-UM_EXPORT_METHOD_AS(setTestDeviceID,
+EX_EXPORT_METHOD_AS(setTestDeviceID,
                     setTestDeviceID:(NSString *)testDeviceID
-                    resolver:(UMPromiseResolveBlock)resolve
-                    rejecter:(UMPromiseRejectBlock)reject)
+                    resolver:(EXPromiseResolveBlock)resolve
+                    rejecter:(EXPromiseRejectBlock)reject)
 {
   _testDeviceID = testDeviceID;
   resolve(nil);
 }
 
-UM_EXPORT_METHOD_AS(requestAd,
-                    requestAd:(UMPromiseResolveBlock)resolve
-                    rejecter:(UMPromiseRejectBlock)reject)
+EX_EXPORT_METHOD_AS(requestAd,
+                    requestAd:(EXPromiseResolveBlock)resolve
+                    rejecter:(EXPromiseRejectBlock)reject)
 {
   if ([_interstitial hasBeenUsed] || _interstitial == nil) {
     _requestAdResolver = resolve;
@@ -102,15 +102,15 @@ UM_EXPORT_METHOD_AS(requestAd,
   }
 }
 
-UM_EXPORT_METHOD_AS(showAd,
-                    showAd:(UMPromiseResolveBlock)resolve
-                    rejecter:(UMPromiseRejectBlock)reject)
+EX_EXPORT_METHOD_AS(showAd,
+                    showAd:(EXPromiseResolveBlock)resolve
+                    rejecter:(EXPromiseRejectBlock)reject)
 {
   if ([_interstitial isReady] && _showAdResolver == nil) {
     _showAdResolver = resolve;
-    UM_WEAKIFY(self);
+    EX_WEAKIFY(self);
     dispatch_async(dispatch_get_main_queue(), ^{
-      UM_ENSURE_STRONGIFY(self);
+      EX_ENSURE_STRONGIFY(self);
       [self->_interstitial presentFromRootViewController:self.utilities.currentViewController];
     });
   } else if (_showAdResolver != nil) {
@@ -120,18 +120,18 @@ UM_EXPORT_METHOD_AS(showAd,
   }
 }
 
-UM_EXPORT_METHOD_AS(dismissAd,
-                    dismissAd:(UMPromiseResolveBlock)resolve
-                    rejecter:(UMPromiseRejectBlock)reject)
+EX_EXPORT_METHOD_AS(dismissAd,
+                    dismissAd:(EXPromiseResolveBlock)resolve
+                    rejecter:(EXPromiseRejectBlock)reject)
 {
-  UM_WEAKIFY(self);
+  EX_WEAKIFY(self);
   dispatch_async(dispatch_get_main_queue(), ^{
-    UM_ENSURE_STRONGIFY(self);
+    EX_ENSURE_STRONGIFY(self);
     UIViewController *presentedViewController = self.utilities.currentViewController;
     if (presentedViewController != nil && [NSStringFromClass([presentedViewController class]) isEqualToString:@"GADInterstitialViewController"]) {
       [presentedViewController dismissViewControllerAnimated:true completion:^{
         resolve(nil);
-        UM_ENSURE_STRONGIFY(self);
+        EX_ENSURE_STRONGIFY(self);
         self->_interstitial = nil;
       }];
     } else {
@@ -140,9 +140,9 @@ UM_EXPORT_METHOD_AS(dismissAd,
   });
 }
 
-UM_EXPORT_METHOD_AS(getIsReady,
-                    getIsReady:(UMPromiseResolveBlock)resolve
-                    rejecter:(UMPromiseRejectBlock)reject)
+EX_EXPORT_METHOD_AS(getIsReady,
+                    getIsReady:(EXPromiseResolveBlock)resolve
+                    rejecter:(EXPromiseRejectBlock)reject)
 {
   resolve([NSNumber numberWithBool:[_interstitial isReady]]);
 }

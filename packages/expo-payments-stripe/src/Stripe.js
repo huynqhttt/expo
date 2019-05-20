@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import { NativeModulesProxy } from '@unimodules/core';
+import { NativeModulesProxy } from 'expo-core';
 import processTheme from './utils/processTheme';
 import checkArgs from './utils/checkArgs';
 import checkInit from './utils/checkInit';
@@ -27,8 +27,8 @@ class Stripe {
 
   deviceSupportsNativePayAsync = () =>
     Platform.select({
-      ios: () => this.deviceSupportsApplePayAsync(),
-      android: () => this.deviceSupportsAndroidPayAsync(),
+      ios: () => this.deviceSupportsApplePay(),
+      android: () => this.deviceSupportsAndroidPay(),
     })();
 
   // @deprecated use canMakeNativePayPayments
@@ -48,8 +48,8 @@ class Stripe {
   // iOS requires networks array while Android requires nothing
   canMakeNativePayPaymentsAsync = (options = {}) =>
     Platform.select({
-      ios: () => this.canMakeApplePayPaymentsAsync(options),
-      android: () => this.canMakeAndroidPayPaymentsAsync(),
+      ios: () => this.canMakeApplePayPayments(options),
+      android: () => this.canMakeAndroidPayPayments(),
     })();
 
   // @deprecated use paymentRequestWithNativePay
@@ -84,8 +84,8 @@ class Stripe {
 
   paymentRequestWithNativePayAsync(options = {}, items = []) {
     return Platform.select({
-      ios: () => this.paymentRequestWithApplePayAsync(items, options),
-      android: () => this.paymentRequestWithAndroidPayAsync(options),
+      ios: () => this.paymentRequestWithApplePay(items, options),
+      android: () => this.paymentRequestWithAndroidPay(options),
     })();
   }
 
@@ -98,20 +98,20 @@ class Stripe {
   // no corresponding android impl exists
   completeNativePayRequestAsync = () =>
     Platform.select({
-      ios: () => this.completeApplePayRequestAsync(),
+      ios: () => this.completeApplePayRequest(),
       android: () => Promise.resolve(),
     })();
 
   // @deprecated use cancelNativePayRequest
   cancelApplePayRequestAsync = () => {
     checkInit(this);
-    return StripeModule.cancelApplePayRequestAsync();
+    return StripeModule.cancelApplePayRequest();
   };
 
   // no corresponding android impl exists
   cancelNativePayRequestAsync = () =>
     Platform.select({
-      ios: () => this.cancelApplePayRequestAsync(),
+      ios: () => this.cancelApplePayRequest(),
       android: () => Promise.resolve(),
     })();
 
@@ -121,7 +121,7 @@ class Stripe {
   // no corresponding android impl exists
   openNativePaySetupAsync = () =>
     Platform.select({
-      ios: () => this.openApplePaySetupAsync(),
+      ios: () => this.openApplePaySetup(),
       android: () => Promise.resolve(),
     })();
 

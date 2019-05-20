@@ -2,8 +2,7 @@
 
 import React from 'react';
 import { forEach } from 'lodash';
-import { Video } from 'expo-av';
-import { Asset } from 'expo-asset';
+import { Asset, Video } from 'expo';
 import { Platform } from 'react-native';
 
 import { waitFor, retryForStatus, mountAndWaitFor as originalMountAndWaitFor } from './helpers';

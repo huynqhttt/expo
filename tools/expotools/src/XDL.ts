@@ -25,6 +25,7 @@ export async function publishProjectWithExpoCliAsync(
   if (username && password) {
     Log.collapsed('Logging in...');
     await ExpoCLI.runExpoCliAsync('login', ['-u', username, '-p', password], {
+      root: projectRoot,
       useUnversioned: options.useUnversioned,
     });
   } else {

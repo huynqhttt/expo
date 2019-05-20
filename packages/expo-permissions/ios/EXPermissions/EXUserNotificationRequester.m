@@ -3,29 +3,29 @@
 #import <EXPermissions/EXUserNotificationRequester.h>
 #import <UIKit/UIKit.h>
 #import <EXPermissions/EXPermissions.h>
-#import <UMPermissionsInterface/UMUserNotificationCenterProxyInterface.h>
+#import <EXPermissionsInterface/EXUserNotificationCenterProxyInterface.h>
 
 @interface EXUserNotificationRequester ()
 
 @property (nonatomic, weak) id<EXPermissionRequesterDelegate> delegate;
-@property (nonatomic, weak) UMModuleRegistry *moduleRegistry;
+@property (nonatomic, weak) EXModuleRegistry *moduleRegistry;
 
 @end
 
 @implementation EXUserNotificationRequester
 
-- (instancetype)initWithModuleRegistry:(UMModuleRegistry *)moduleRegistry {
+- (instancetype)initWithModuleRegistry:(EXModuleRegistry *)moduleRegistry {
   if (self = [super init]) {
     _moduleRegistry = moduleRegistry;
   }
   return self;
 }
 
-+ (id<UMUserNotificationCenterProxyInterface>)getCenterWithModuleRegistry:(UMModuleRegistry *) moduleRegistry {
-  return [moduleRegistry getModuleImplementingProtocol:@protocol(UMUserNotificationCenterProxyInterface)];
++ (id<EXUserNotificationCenterProxyInterface>)getCenterWithModuleRegistry:(EXModuleRegistry *) moduleRegistry {
+  return [moduleRegistry getModuleImplementingProtocol:@protocol(EXUserNotificationCenterProxyInterface)];
 }
 
-+ (NSDictionary *)permissionsWithModuleRegistry:(UMModuleRegistry *)moduleRegistry
++ (NSDictionary *)permissionsWithModuleRegistry:(EXModuleRegistry *)moduleRegistry
 {
   dispatch_assert_queue_not(dispatch_get_main_queue());
   dispatch_semaphore_t sem = dispatch_semaphore_create(0);
@@ -67,12 +67,12 @@
   _delegate = delegate;
 }
 
-- (void)requestPermissionsWithResolver:(UMPromiseResolveBlock)resolve rejecter:(UMPromiseRejectBlock)reject
+- (void)requestPermissionsWithResolver:(EXPromiseResolveBlock)resolve rejecter:(EXPromiseRejectBlock)reject
 {
   __weak EXUserNotificationRequester *weakSelf = self;
 
   UNAuthorizationOptions options = UNAuthorizationOptionAlert + UNAuthorizationOptionSound + UNAuthorizationOptionBadge;
-  id<UMUserNotificationCenterProxyInterface> notificationCenter = [EXUserNotificationRequester getCenterWithModuleRegistry:_moduleRegistry];
+  id<EXUserNotificationCenterProxyInterface> notificationCenter = [EXUserNotificationRequester getCenterWithModuleRegistry:_moduleRegistry];
   [notificationCenter requestAuthorizationWithOptions:options completionHandler:^(BOOL granted, NSError * _Nullable error) {
     id<EXPermissionsModule> permissionsModule = [weakSelf.moduleRegistry getModuleImplementingProtocol:@protocol(EXPermissionsModule)];
     NSAssert(permissionsModule, @"Permissions module is required to properly consume result.");
@@ -86,7 +86,7 @@
   }];
 }
 
-- (void)_consumeResolverWithCurrentPermissions:(UMPromiseResolveBlock)resolver
+- (void)_consumeResolverWithCurrentPermissions:(EXPromiseResolveBlock)resolver
 {
   if (resolver) {
     resolver([[self class] permissionsWithModuleRegistry:_moduleRegistry]);

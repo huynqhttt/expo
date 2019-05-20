@@ -23,7 +23,6 @@ import com.facebook.react.devsupport.DoubleTapReloadRecognizer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.unimodules.core.interfaces.Package;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -34,6 +33,8 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
+import expo.core.interfaces.Package;
+import host.exp.exponent.ABIVersion;
 import host.exp.exponent.Constants;
 import host.exp.exponent.ExponentManifest;
 import host.exp.exponent.LoadingView;
@@ -147,7 +148,7 @@ public abstract class ReactNativeActivity extends FragmentActivity implements co
     mLayout.addView(mContainer);
     mLoadingView = new LoadingView(this);
     if (!Constants.isStandaloneApp() || Constants.SHOW_LOADING_VIEW_IN_SHELL_APP) {
-      mContainer.setBackgroundColor(ContextCompat.getColor(this, R.color.splashBackground));
+      mContainer.setBackgroundColor(ContextCompat.getColor(this, R.color.white));
       mLayout.addView(mLoadingView);
     }
 
@@ -282,7 +283,9 @@ public abstract class ReactNativeActivity extends FragmentActivity implements co
         if (didDoubleTapR) {
           // The loading screen is hidden by versioned code when reloading JS so we can't show it
           // on older sdks.
-          showLoadingScreen(mManifest);
+          if (ABIVersion.toNumber(mSDKVersion) >= ABIVersion.toNumber("26.0.0")) {
+            showLoadingScreen(mManifest);
+          }
           devSupportManager.call("handleReloadJS");
           return true;
         }
@@ -445,6 +448,14 @@ public abstract class ReactNativeActivity extends FragmentActivity implements co
           .loadVersion(mSDKVersion)
           .construct(progressListener);
       builder.callRecursive("setDevBundleDownloadListener", devBundleDownloadListener.get());
+
+      // checkForReactViews() is normally called in dev mode by devBundleDownloadListener.onSuccess()
+      // so that AppLoading will continue to show the splash screen correctly. However, the
+      // onSuccess() method is not called by RN for SDK 25 and below, so we need to check for react views here
+      // TODO: remove once SDK 25 is phased out
+      if (ABIVersion.toNumber(mSDKVersion) < ABIVersion.toNumber("26.0.0")) {
+        checkForReactViews();
+      }
     } else {
       checkForReactViews();
     }
@@ -599,6 +610,10 @@ public abstract class ReactNativeActivity extends FragmentActivity implements co
     if (Constants.SHELL_APP_SCHEME != null) {
       return Constants.SHELL_APP_SCHEME + "://";
     } else {
+      if (ABIVersion.toNumber(mSDKVersion) < ABIVersion.toNumber("27.0.0")) {
+        // keep old behavior on old projects to not introduce breaking changes
+        return mManifestUrl + "/+";
+      }
       Uri uri = Uri.parse(mManifestUrl);
       String host = uri.getHost();
       if (host != null && (host.equals("exp.host") || host.equals("expo.io") || host.equals("exp.direct") || host.equals("expo.test") ||

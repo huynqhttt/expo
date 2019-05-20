@@ -1,4 +1,4 @@
-import { Platform } from '@unimodules/core';
+import { Platform } from 'expo-core';
 import ExpoSMS from './ExpoSMS';
 export async function sendSMSAsync(addresses, message) {
     const finalAddresses = Array.isArray(addresses) ? addresses : [addresses];

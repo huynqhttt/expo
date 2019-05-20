@@ -1,5 +1,5 @@
 import DeviceSensor from './DeviceSensor';
-export interface DeviceMotionMeasurement {
+declare type Measurement = {
     acceleration: {
         x: number;
         y: number;
@@ -21,8 +21,8 @@ export interface DeviceMotionMeasurement {
         gamma: number;
     };
     orientation: number;
-}
-declare class DeviceMotionSensor extends DeviceSensor<DeviceMotionMeasurement> {
+};
+declare class DeviceMotionSensor extends DeviceSensor<Measurement> {
     Gravity: any;
 }
 export declare const Gravity: any;

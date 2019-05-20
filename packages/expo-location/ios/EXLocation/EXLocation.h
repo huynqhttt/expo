@@ -1,12 +1,11 @@
 // Copyright 2015-present 650 Industries. All rights reserved.
 
 #import <CoreLocation/CLLocation.h>
-#import <CoreLocation/CLLocationManager.h>
 
-#import <UMCore/UMEventEmitter.h>
-#import <UMCore/UMExportedModule.h>
-#import <UMCore/UMAppLifecycleListener.h>
-#import <UMCore/UMModuleRegistryConsumer.h>
+#import <EXCore/EXEventEmitter.h>
+#import <EXCore/EXExportedModule.h>
+#import <EXCore/EXAppLifecycleListener.h>
+#import <EXCore/EXModuleRegistryConsumer.h>
 
 // Location accuracies
 typedef NS_ENUM(NSUInteger, EXLocationAccuracy) {
@@ -31,10 +30,9 @@ typedef NS_ENUM(NSUInteger, EXGeofencingRegionState) {
   EXGeofencingRegionStateOutside = 2,
 };
 
-@interface EXLocation : UMExportedModule <UMAppLifecycleListener, UMEventEmitter, UMModuleRegistryConsumer>
+@interface EXLocation : EXExportedModule <EXAppLifecycleListener, EXEventEmitter, EXModuleRegistryConsumer>
 
 + (NSDictionary *)exportLocation:(CLLocation *)location;
 + (CLLocationAccuracy)CLLocationAccuracyFromOption:(EXLocationAccuracy)accuracy;
-+ (CLActivityType)CLActivityTypeFromOption:(NSInteger)activityType;
 
 @end

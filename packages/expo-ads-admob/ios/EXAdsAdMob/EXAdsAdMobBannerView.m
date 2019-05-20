@@ -1,5 +1,5 @@
 #import <EXAdsAdMob/EXAdsAdMobBannerView.h>
-#import <UMCore/UMEventEmitterService.h>
+#import <EXCore/EXEventEmitterService.h>
 
 @implementation EXAdsAdMobBannerView {
   GADBannerView *_bannerView;
@@ -52,13 +52,13 @@
   }
 }
 
-- (void)setOnSizeChange:(UMDirectEventBlock)block
+- (void)setOnSizeChange:(EXDirectEventBlock)block
 {
   _onSizeChange = block;
   [self loadBanner];
 }
 
-- (void)setOnDidFailToReceiveAdWithError:(UMDirectEventBlock)block
+- (void)setOnDidFailToReceiveAdWithError:(EXDirectEventBlock)block
 {
   _onDidFailToReceiveAdWithError = block;
   [self loadBanner];

@@ -8,7 +8,6 @@ import android.support.multidex.MultiDexApplication;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 import com.crashlytics.android.core.CrashlyticsListener;
-import com.facebook.ads.AudienceNetworkAds;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.soloader.SoLoader;
 
@@ -38,6 +37,7 @@ public abstract class ExpoApplication extends MultiDexApplication {
   // Override me!
   public abstract String gcmSenderId();
   public abstract boolean isDebug();
+  public abstract boolean shouldUseInternetKernel();
 
   private static final String TAG = ExpoApplication.class.getSimpleName();
 
@@ -107,7 +107,6 @@ public abstract class ExpoApplication extends MultiDexApplication {
     }
 
     BranchManager.initialize(this);
-    AudienceNetworkAds.initialize(this);
 
     try {
       // Remove the badge count on weird launchers
@@ -128,11 +127,5 @@ public abstract class ExpoApplication extends MultiDexApplication {
 
     // Add exception handler. This is used by the entire process, so only need to add it here.
     Thread.setDefaultUncaughtExceptionHandler(new ExponentUncaughtExceptionHandler(getApplicationContext()));
-  }
-
-  // we're leaving this stub in here so that if people don't modify their MainApplication to
-  // remove the override of shouldUseInternetKernel() their project will still build without errors
-  public boolean shouldUseInternetKernel() {
-    return !isDebug();
   }
 }

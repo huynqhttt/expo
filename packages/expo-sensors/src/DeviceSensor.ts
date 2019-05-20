@@ -1,4 +1,4 @@
-import { EventEmitter, Subscription, Platform } from '@unimodules/core';
+import { EventEmitter, Subscription } from 'expo-core';
 
 type Listener<E> = (event: E) => void;
 
@@ -47,17 +47,6 @@ export default class DeviceSensor<M> {
   }
 
   setUpdateInterval(intervalMs: number): void {
-    if (!this._nativeModule.setUpdateInterval) {
-      console.warn(`expo-sensors: setUpdateInterval() is not supported on ${Platform.OS}`);
-    } else {
-      this._nativeModule.setUpdateInterval(intervalMs);
-    }
-  }
-  async isAvailableAsync(): Promise<boolean> {
-    if (!this._nativeModule.isAvailableAsync) {
-      return false;
-    } else {
-      return await this._nativeModule.isAvailableAsync();
-    }
+    this._nativeModule.setUpdateInterval(intervalMs);
   }
 }

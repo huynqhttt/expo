@@ -1,10 +1,9 @@
 {
   "name": "expo-sensors",
-  "version": "5.0.0-rc.0",
-  "description": "Provides access to a hardware device's accelerometer, gyroscope, magnetometer, and pedometer.",
+  "version": "2.0.0",
+  "description": "Expo Sensors universal module",
   "main": "build/index.js",
   "types": "build/index.d.ts",
-  "sideEffects": false,
   "scripts": {
     "build": "expo-module build",
     "clean": "expo-module clean",
@@ -21,25 +20,24 @@
     "devicemotion",
     "gyroscope",
     "magnetometer",
-    "pedometer",
-    "barometer"
+    "pedometer"
   ],
   "repository": {
     "type": "git",
     "url": "https://github.com/expo/expo.git"
   },
+  "author": "650 Industries, Inc.",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/expo/expo/issues"
   },
-  "author": "650 Industries, Inc.",
-  "license": "MIT",
-  "homepage": "https://docs.expo.io/versions/latest/sdk/sensors/",
+  "homepage": "https://github.com/expo/expo/tree/master/packages/expo-sensors",
   "jest": {
     "preset": "expo-module-scripts"
   },
-  "unimodulePeerDependencies": {
-    "@unimodules/core": "*",
-    "unimodules-sensors-interface": "*"
+  "peerDependencies": {
+    "expo-core": "~2.0.0",
+    "expo-sensors-interface": "~2.0.0"
   },
   "dependencies": {
     "invariant": "^2.2.4"
@@ -48,5 +46,5 @@
     "babel-preset-expo": "^5.0.0",
     "expo-module-scripts": "^1.0.0"
   },
-  "gitHead": "211a7a3ce4007e7aa10ccf6efac4b5333ec31d0a"
+  "gitHead": "f15abc53c111bd0438cd36dc456c59cfa7c56a58"
 }

@@ -2,9 +2,7 @@
 
 import React from 'react';
 import { Platform } from 'react-native';
-import * as Permissions from 'expo-permissions';
-import { BarCodeScanner } from 'expo-barcode-scanner';
-import { Asset } from 'expo-asset';
+import { Asset, BarCodeScanner, Permissions } from 'expo';
 import * as TestUtils from '../TestUtils';
 
 import { mountAndWaitFor as originalMountAndWaitFor } from './helpers';

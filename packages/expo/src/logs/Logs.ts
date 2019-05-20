@@ -2,7 +2,7 @@ import RemoteConsole from './RemoteConsole';
 
 let _originalConsole: typeof console | null;
 
-export function enableExpoCliLogging(): void {
+function enableExpoCliLogging(): void {
   if (_originalConsole) {
     return;
   }
@@ -11,7 +11,7 @@ export function enableExpoCliLogging(): void {
   global.console = RemoteConsole.createRemoteConsole(global.console);
 }
 
-export function disableExpoCliLogging(): void {
+function disableExpoCliLogging(): void {
   if (!_originalConsole) {
     return;
   }
@@ -19,3 +19,8 @@ export function disableExpoCliLogging(): void {
   global.console = _originalConsole;
   _originalConsole = null;
 }
+
+export default {
+  enableExpoCliLogging,
+  disableExpoCliLogging,
+};

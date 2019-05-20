@@ -1,8 +1,8 @@
 import { Platform } from 'react-native';
 import ExponentPrint from './ExponentPrint';
-import { UnavailabilityError } from '@unimodules/core';
-export const Orientation = ExponentPrint.Orientation;
-export async function printAsync(options) {
+import { UnavailabilityError } from 'expo-errors';
+const Orientation = ExponentPrint.Orientation;
+async function printAsync(options) {
     if (Platform.OS === 'web') {
         return await ExponentPrint.print(options);
     }
@@ -14,13 +14,19 @@ export async function printAsync(options) {
     }
     return await ExponentPrint.print(options);
 }
-export async function selectPrinterAsync() {
+async function selectPrinterAsync() {
     if (ExponentPrint.selectPrinter) {
         return await ExponentPrint.selectPrinter();
     }
     throw new UnavailabilityError('Print', 'selectPrinterAsync');
 }
-export async function printToFileAsync(options = {}) {
+async function printToFileAsync(options = {}) {
     return await ExponentPrint.printToFileAsync(options);
 }
+export default {
+    Orientation,
+    printAsync,
+    selectPrinterAsync,
+    printToFileAsync,
+};
 //# sourceMappingURL=Print.js.map

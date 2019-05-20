@@ -6,7 +6,7 @@
     "sdkVersion": "UNVERSIONED",
     "orientation": "portrait",
     "packagerOpts": {
-      "config": "metro.config.js"
+      "config": "rn-cli.config.js"
     }
   }
 }

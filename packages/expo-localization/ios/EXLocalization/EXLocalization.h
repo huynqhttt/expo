@@ -1,6 +1,6 @@
 // Copyright 2018-present 650 Industries. All rights reserved.
 
-#import <UMCore/UMExportedModule.h>
+#import <EXCore/EXExportedModule.h>
 
-@interface EXLocalization : UMExportedModule
+@interface EXLocalization : EXExportedModule
 @end

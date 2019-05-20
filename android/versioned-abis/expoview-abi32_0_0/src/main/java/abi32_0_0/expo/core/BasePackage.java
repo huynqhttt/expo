@@ -7,7 +7,7 @@ import java.util.List;
 
 import abi32_0_0.expo.core.interfaces.InternalModule;
 import abi32_0_0.expo.core.interfaces.Package;
-import org.unimodules.core.interfaces.SingletonModule;
+import expo.core.interfaces.SingletonModule;
 
 public class BasePackage implements Package {
   @Override

@@ -5,6 +5,7 @@
 #import "EXAnalytics.h"
 #import "EXBuildConstants.h"
 #import "EXEnvironment.h"
+#import "EXFacebook.h"
 #import "EXGoogleAuthManager.h"
 #import "EXKernel.h"
 #import "EXKernelUtil.h"
@@ -14,6 +15,7 @@
 #import "EXBranchManager.h"
 
 #import <Crashlytics/Crashlytics.h>
+#import <FBSDKCoreKit/FBSDKCoreKit.h>
 #import <GoogleMaps/GoogleMaps.h>
 
 NSString * const EXAppDidRegisterForRemoteNotificationsNotification = @"kEXAppDidRegisterForRemoteNotificationsNotification";
@@ -91,6 +93,11 @@ NSString * const EXAppDidRegisterUserNotificationSettingsNotification = @"kEXApp
 
   RCTSetFatalHandler(handleFatalReactError);
 
+  if ([EXFacebook facebookAppIdFromNSBundle]) {
+    [[FBSDKApplicationDelegate sharedInstance] application:application
+                             didFinishLaunchingWithOptions:launchOptions];
+  }
+
   // init analytics
   [EXAnalytics sharedInstance];
 
@@ -149,12 +156,6 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandl
   completionHandler(UIBackgroundFetchResultNoData);
 }
 
-// TODO: Remove once SDK31 is phased out
-- (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(nonnull UIUserNotificationSettings *)notificationSettings
-{
-  [[NSNotificationCenter defaultCenter] postNotificationName:EXAppDidRegisterUserNotificationSettingsNotification object:nil];
-}
-
 #pragma mark - deep linking hooks
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(nullable NSString *)sourceApplication annotation:(id)annotation
@@ -162,6 +163,15 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandl
   if ([[EXKernel sharedInstance].serviceRegistry.googleAuthManager
        application:application openURL:url sourceApplication:sourceApplication annotation:annotation]) {
     return YES;
+  }
+
+  if ([EXFacebook facebookAppIdFromNSBundle]) {
+    if ([[FBSDKApplicationDelegate sharedInstance] application:application
+                                                       openURL:url
+                                             sourceApplication:sourceApplication
+                                                    annotation:annotation]) {
+      return YES;
+    }
   }
 
   if ([[EXKernel sharedInstance].serviceRegistry.branchManager

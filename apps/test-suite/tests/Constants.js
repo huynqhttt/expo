@@ -1,6 +1,6 @@
 'use strict';
 
-import Constants from 'expo-constants';
+import { Constants } from 'expo';
 
 export const name = 'Constants';
 
@@ -15,8 +15,6 @@ export function test(t) {
       'sessionId',
       'manifest',
       'linkingUri',
-      'nativeAppVersion',
-      'nativeBuildVersion',
     ].forEach(v =>
       t.it(`has ${v}`, () => {
         t.expect(Constants[v]).toBeDefined();

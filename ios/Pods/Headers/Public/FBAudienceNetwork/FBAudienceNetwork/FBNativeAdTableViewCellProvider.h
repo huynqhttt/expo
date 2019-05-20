@@ -1,1 +1,1 @@
-../../../../FBAudienceNetwork/Static/FBAudienceNetwork.framework/Headers/FBNativeAdTableViewCellProvider.h
+../../../../FBAudienceNetwork/FBAudienceNetwork.framework/Headers/FBNativeAdTableViewCellProvider.h

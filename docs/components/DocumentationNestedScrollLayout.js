@@ -120,9 +120,8 @@ const STYLES_RIGHT = css`
 const STYLES_SCROLL_CONTAINER = css`
   height: 100%;
   width: 100%;
-  padding-bottom: 36px;
+  padding-bottom: 72px;
   overflow-y: scroll;
-  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
 
   /* width */

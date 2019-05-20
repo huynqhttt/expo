@@ -1,20 +1,19 @@
-import { EventEmitter } from '@unimodules/core';
+import { EventEmitter } from 'expo-core';
 declare const LocationEventEmitter: EventEmitter;
-export interface ProviderStatus {
+interface ProviderStatus {
     locationServicesEnabled: boolean;
     gpsAvailable?: boolean;
     networkAvailable?: boolean;
     passiveAvailable?: boolean;
 }
-export interface LocationOptions {
+interface LocationOptions {
     accuracy?: LocationAccuracy;
     enableHighAccuracy?: boolean;
     timeInterval?: number;
     distanceInterval?: number;
     timeout?: number;
-    mayShowUserSettingsDialog?: boolean;
 }
-export interface LocationData {
+interface LocationData {
     coords: {
         latitude: number;
         longitude: number;
@@ -25,18 +24,18 @@ export interface LocationData {
     };
     timestamp: number;
 }
-export interface HeadingData {
+interface HeadingData {
     trueHeading: number;
     magHeading: number;
     accuracy: number;
 }
-export interface GeocodedLocation {
+interface GeocodedLocation {
     latitude: number;
     longitude: number;
     altitude?: number;
     accuracy?: number;
 }
-export interface Address {
+interface Address {
     city: string;
     street: string;
     region: string;
@@ -46,19 +45,7 @@ export interface Address {
 }
 interface LocationTaskOptions {
     accuracy?: LocationAccuracy;
-    timeInterval?: number;
-    distanceInterval?: number;
     showsBackgroundLocationIndicator?: boolean;
-    deferredUpdatesDistance?: number;
-    deferredUpdatesTimeout?: number;
-    deferredUpdatesInterval?: number;
-    activityType?: LocationActivityType;
-    pausesUpdatesAutomatically?: boolean;
-    foregroundService?: {
-        notificationTitle: string;
-        notificationBody: string;
-        notificationColor?: string;
-    };
 }
 interface Region {
     identifier?: string;
@@ -78,14 +65,7 @@ declare enum LocationAccuracy {
     Highest = 5,
     BestForNavigation = 6
 }
-declare enum LocationActivityType {
-    Other = 1,
-    AutomotiveNavigation = 2,
-    Fitness = 3,
-    OtherNavigation = 4,
-    Airborne = 5
-}
-export { LocationAccuracy as Accuracy, LocationActivityType as ActivityType, };
+export { LocationAccuracy as Accuracy };
 export declare enum GeofencingEventType {
     Enter = 1,
     Exit = 2
@@ -97,12 +77,9 @@ export declare enum GeofencingRegionState {
 }
 declare function _getCurrentWatchId(): number;
 export declare function getProviderStatusAsync(): Promise<ProviderStatus>;
-export declare function enableNetworkProviderAsync(): Promise<void>;
 export declare function getCurrentPositionAsync(options?: LocationOptions): Promise<LocationData>;
 export declare function getHeadingAsync(): Promise<HeadingData>;
-export declare function watchHeadingAsync(callback: HeadingCallback): Promise<{
-    remove: () => void;
-}>;
+export declare function watchHeadingAsync(callback: HeadingCallback): Promise<object>;
 export declare function geocodeAsync(address: string): Promise<Array<GeocodedLocation>>;
 export declare function reverseGeocodeAsync(location: {
     latitude: number;

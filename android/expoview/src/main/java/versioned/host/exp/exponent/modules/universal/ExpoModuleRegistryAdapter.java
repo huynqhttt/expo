@@ -9,18 +9,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.unimodules.adapters.react.ModuleRegistryAdapter;
-import org.unimodules.adapters.react.ModuleRegistryReadyNotifier;
-import org.unimodules.adapters.react.NativeModulesProxy;
-import org.unimodules.adapters.react.ReactAdapterPackage;
-import org.unimodules.adapters.react.ReactModuleRegistryProvider;
-import org.unimodules.core.ModuleRegistry;
-import org.unimodules.core.interfaces.InternalModule;
-import org.unimodules.core.interfaces.ModuleRegistryConsumer;
+import expo.adapters.react.ModuleRegistryAdapter;
+import expo.adapters.react.ModuleRegistryReadyNotifier;
+import expo.adapters.react.NativeModulesProxy;
+import expo.adapters.react.ReactAdapterPackage;
+import expo.adapters.react.ReactModuleRegistryProvider;
+import expo.core.ModuleRegistry;
+import expo.core.interfaces.InternalModule;
+import expo.core.interfaces.ModuleRegistryConsumer;
 import host.exp.exponent.ExponentManifest;
 import host.exp.exponent.kernel.ExperienceId;
 import host.exp.exponent.utils.ScopedContext;
-import versioned.host.exp.exponent.modules.universal.av.SharedCookiesDataSourceFactoryProvider;
 import versioned.host.exp.exponent.modules.universal.sensors.ScopedAccelerometerService;
 import versioned.host.exp.exponent.modules.universal.sensors.ScopedGravitySensorService;
 import versioned.host.exp.exponent.modules.universal.sensors.ScopedGyroscopeService;
@@ -30,6 +29,8 @@ import versioned.host.exp.exponent.modules.universal.sensors.ScopedMagnetometerU
 import versioned.host.exp.exponent.modules.universal.sensors.ScopedRotationVectorSensorService;
 
 public class ExpoModuleRegistryAdapter extends ModuleRegistryAdapter implements ScopedModuleRegistryAdapter {
+  protected ReactAdapterPackage mReactAdapterPackage = new ReactAdapterPackage();
+
   public ExpoModuleRegistryAdapter(ReactModuleRegistryProvider moduleRegistryProvider) {
     super(moduleRegistryProvider);
   }
@@ -45,7 +46,6 @@ public class ExpoModuleRegistryAdapter extends ModuleRegistryAdapter implements 
     moduleRegistry.registerInternalModule(new ScopedMagnetometerService(experienceId));
     moduleRegistry.registerInternalModule(new ScopedMagnetometerUncalibratedService(experienceId));
     moduleRegistry.registerInternalModule(new ScopedRotationVectorSensorService(experienceId));
-    moduleRegistry.registerInternalModule(new SharedCookiesDataSourceFactoryProvider());
 
     // Overriding expo-permissions/PermissionsService -- binding checks with kernel services
     moduleRegistry.registerInternalModule(new PermissionsServiceBinding(scopedContext, experienceId));
@@ -58,8 +58,6 @@ public class ExpoModuleRegistryAdapter extends ModuleRegistryAdapter implements 
 
     // Overriding expo-file-system FileSystemModule
     moduleRegistry.registerExportedModule(new ScopedFileSystemModule(scopedContext));
-
-    moduleRegistry.registerExportedModule(new SecureStoreModuleBinding(scopedContext));
 
     // ReactAdapterPackage requires ReactContext
     ReactApplicationContext reactContext = (ReactApplicationContext) scopedContext.getContext();
@@ -86,7 +84,7 @@ public class ExpoModuleRegistryAdapter extends ModuleRegistryAdapter implements 
 
     nativeModulesList.add(new NativeModulesProxy(reactApplicationContext, moduleRegistry));
 
-    // Add listener that will notify org.unimodules.core.ModuleRegistry when all modules are ready
+    // Add listener that will notify expo.core.ModuleRegistry when all modules are ready
     nativeModulesList.add(new ModuleRegistryReadyNotifier(moduleRegistry));
 
     return nativeModulesList;

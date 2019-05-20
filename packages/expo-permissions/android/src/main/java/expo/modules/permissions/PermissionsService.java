@@ -8,11 +8,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.unimodules.core.ModuleRegistry;
-import org.unimodules.core.interfaces.InternalModule;
-import org.unimodules.core.interfaces.ModuleRegistryConsumer;
-import org.unimodules.interfaces.permissions.Permissions;
-import org.unimodules.interfaces.permissions.PermissionsListener;
+import expo.core.ModuleRegistry;
+import expo.core.interfaces.InternalModule;
+import expo.core.interfaces.ModuleRegistryConsumer;
+import expo.interfaces.permissions.Permissions;
+import expo.interfaces.permissions.PermissionsListener;
 
 public class PermissionsService implements InternalModule, ModuleRegistryConsumer, Permissions {
   protected Context mContext;
@@ -72,13 +72,5 @@ public class PermissionsService implements InternalModule, ModuleRegistryConsume
         listener.onPermissionResult(results[0]);
       }
     });
-  }
-
-  @Override
-  public boolean hasPermissions(String[] permissions) {
-    int[] results = getPermissions(permissions);
-    int[] granted = new int[permissions.length];
-    Arrays.fill(granted, PackageManager.PERMISSION_GRANTED);
-    return Arrays.equals(results, granted);
   }
 }

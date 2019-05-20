@@ -1,8 +1,8 @@
 package expo.modules.permissions;
 
-import org.unimodules.core.ModuleRegistry;
-import org.unimodules.interfaces.permissions.PermissionsListener;
-import org.unimodules.interfaces.permissions.PermissionsManager;
+import expo.core.ModuleRegistry;
+import expo.interfaces.permissions.PermissionsListener;
+import expo.interfaces.permissions.PermissionsManager;
 
 public class PermissionsRequester {
 

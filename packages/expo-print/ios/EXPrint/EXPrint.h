@@ -1,10 +1,10 @@
 // Copyright 2015-present 650 Industries. All rights reserved.
 
-#import <UMCore/UMModuleRegistry.h>
-#import <UMCore/UMAppLifecycleListener.h>
-#import <UMCore/UMModuleRegistryConsumer.h>
+#import <EXCore/EXModuleRegistry.h>
+#import <EXCore/EXAppLifecycleListener.h>
+#import <EXCore/EXModuleRegistryConsumer.h>
 #import <UIKit/UIKit.h>
 
-@interface EXPrint : UMExportedModule <UMModuleRegistryConsumer>
+@interface EXPrint : EXExportedModule <EXModuleRegistryConsumer>
 
 @end

@@ -6,15 +6,10 @@ import * as Constants from '~/common/constants';
 
 import DocumentationSidebarLink from '~/components/DocumentationSidebarLink';
 import DocumentationSidebarTitle from '~/components/DocumentationSidebarTitle';
-import DocumentationSidebarGroup from '~/components/DocumentationSidebarGroup';
 
 const STYLES_SIDEBAR = css`
-  padding: 20px 24px 24px 24px;
-  width: 280px;
-
-  @media screen and (max-width: ${Constants.breakpoints.mobile}) {
-    width: 100%;
-  }
+  width: 100%;
+  padding: 32px 24px 24px 24px;
 `;
 
 const STYLES_SECTION_CATEGORY = css`
@@ -26,10 +21,10 @@ export default class DocumentationSidebar extends React.Component {
     routes: [],
   };
 
-  _renderPostElements = (info, category) => {
+  _renderPostElements = info => {
     return (
       <DocumentationSidebarLink
-        key={`${category}-${info.name}`}
+        key={`${this.props.url}-${info.name}`}
         info={info}
         url={this.props.url}
         asPath={this.props.asPath}>
@@ -39,21 +34,9 @@ export default class DocumentationSidebar extends React.Component {
   };
 
   _renderCategoryElements = info => {
-    if (info.children) {
-      return (
-        <DocumentationSidebarGroup
-          key={`group-${info.name}`}
-          url={this.props.url}
-          info={info}
-          asPath={this.props.asPath}>
-          {info.children.map(categoryInfo => this._renderCategoryElements(categoryInfo))}
-        </DocumentationSidebarGroup>
-      );
-    }
-
     const titleElement = (
       <DocumentationSidebarTitle
-        key={info.name}
+        key={`${this.props.url}-${info.name}`}
         info={info}
         url={this.props.url}
         asPath={this.props.asPath}>
@@ -63,7 +46,7 @@ export default class DocumentationSidebar extends React.Component {
 
     let postElements;
     if (info.posts) {
-      postElements = info.posts.map(postInfo => this._renderPostElements(postInfo, info.name));
+      postElements = info.posts.map(postInfo => this._renderPostElements(postInfo));
     }
 
     return (

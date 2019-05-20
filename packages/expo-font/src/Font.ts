@@ -1,6 +1,7 @@
 import { Asset } from 'expo-asset';
 import Constants from 'expo-constants';
-import { Platform } from '@unimodules/core';
+import { Platform } from 'expo-core';
+import invariant from 'invariant';
 
 import ExpoFontLoader from './ExpoFontLoader';
 
@@ -26,13 +27,13 @@ export function processFontFamily(name: string | null): string | null {
     if (__DEV__) {
       if (isLoading(name)) {
         console.error(
-          `You started loading the font "${name}", but used it before it finished loading.\n
+`You started loading the font "${name}", but used it before it finished loading.\n
 - You need to wait for Font.loadAsync to complete before using the font.\n
 - We recommend loading all fonts before rendering the app, and rendering only Expo.AppLoading while waiting for loading to complete.`
         );
       } else {
         console.error(
-          `fontFamily "${name}" is not a system font and has not been loaded through Font.loadAsync.\n
+`fontFamily "${name}" is not a system font and has not been loaded through Font.loadAsync.\n
 - If you intended to use a system font, make sure you typed the name correctly and that it is supported by your device operating system.\n
 - If this is a custom font, be sure to load it with Font.loadAsync.`
         );
@@ -79,9 +80,7 @@ export async function loadAsync(
   // promise in the program, we need to create the promise synchronously without yielding the event
   // loop from this point.
 
-  if (!source) {
-    throw new Error(`No source from which to load font "${name}"`);
-  }
+  invariant(source, `No source from which to load font "${name}"`);
   const asset = _getAssetForSource(source);
   loadPromises[name] = (async () => {
     try {
@@ -96,10 +95,6 @@ export async function loadAsync(
 }
 
 function _getAssetForSource(source: FontSource): Asset {
-  if (source instanceof Asset) {
-    return source;
-  }
-
   if (!isWeb && typeof source === 'string') {
     // TODO(nikki): need to implement Asset.fromUri(...)
     // asset = Asset.fromUri(uriOrModuleOrAsset);
@@ -112,9 +107,6 @@ function _getAssetForSource(source: FontSource): Asset {
     return Asset.fromModule(source);
   }
 
-  // @ts-ignore Error: Type 'string' is not assignable to type 'Asset'
-  // We can't have a string here, we would have thrown an error if !isWeb
-  // or returned Asset.fromModule if isWeb.
   return source;
 }
 
@@ -133,25 +125,19 @@ function _getNativeFontName(name: string): string {
   return `${Constants.sessionId}-${name}`;
 }
 
-declare var module: any;
-
-if (module && module.exports) {
-  let wasImportWarningShown = false;
-  // @ts-ignore: Temporarily define an export named "Font" for legacy compatibility
-  Object.defineProperty(exports, 'Font', {
-    get() {
-      if (!wasImportWarningShown) {
-        console.warn(
-          `The syntax "import { Font } from 'expo-font'" is deprecated. Use "import * as Font from 'expo-font'" or import named exports instead. Support for the old syntax will be removed in SDK 33.`
-        );
-        wasImportWarningShown = true;
-      }
-      return {
-        processFontFamily,
-        isLoaded,
-        isLoading,
-        loadAsync,
-      };
-    },
-  });
-}
+let wasImportWarningShown = false;
+// @ts-ignore: Temporarily define an export named "Font" for legacy compatibility
+Object.defineProperty(exports, 'Font', {
+  get() {
+    if (!wasImportWarningShown) {
+      console.warn(`The syntax "import { Font } from 'expo-font'" is deprecated. Use "import * as Font from 'expo-font'" or import named exports instead. Support for the old syntax will be removed in SDK 33.`);
+      wasImportWarningShown = true;
+    }
+    return {
+      processFontFamily,
+      isLoaded,
+      isLoading,
+      loadAsync,
+    }
+  }
+})

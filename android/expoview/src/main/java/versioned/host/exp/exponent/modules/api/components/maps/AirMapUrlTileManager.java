@@ -55,9 +55,4 @@ public class AirMapUrlTileManager extends ViewGroupManager<AirMapUrlTile> {
     view.setMaximumZ(maximumZ);
   }
 
-  @ReactProp(name = "flipY", defaultBoolean = false)
-  public void setFlipY(AirMapUrlTile view, boolean flipY) {
-    view.setFlipY(flipY);
-  }
-
 }

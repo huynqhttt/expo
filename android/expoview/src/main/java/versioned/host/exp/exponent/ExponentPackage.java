@@ -12,9 +12,6 @@ import com.facebook.react.uimanager.ViewManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.unimodules.adapters.react.ReactModuleRegistryProvider;
-import org.unimodules.core.interfaces.Package;
-import org.unimodules.core.interfaces.SingletonModule;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -25,28 +22,53 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import expo.adapters.react.ReactModuleRegistryProvider;
+import expo.core.interfaces.Package;
+import expo.core.interfaces.SingletonModule;
 import host.exp.exponent.ExponentManifest;
 import host.exp.exponent.analytics.EXL;
 import host.exp.exponent.kernel.ExperienceId;
 import host.exp.exponent.kernel.ExponentKernelModuleProvider;
 import host.exp.exponent.utils.ScopedContext;
+import versioned.host.exp.exponent.modules.api.AmplitudeModule;
+import versioned.host.exp.exponent.modules.api.BrightnessModule;
+import versioned.host.exp.exponent.modules.api.CalendarModule;
+import versioned.host.exp.exponent.modules.api.DocumentPickerModule;
 import versioned.host.exp.exponent.modules.api.ErrorRecoveryModule;
+import versioned.host.exp.exponent.modules.api.FacebookModule;
+import versioned.host.exp.exponent.modules.api.ImageManipulatorModule;
+import versioned.host.exp.exponent.modules.api.ImagePickerModule;
+import versioned.host.exp.exponent.modules.api.IntentLauncherModule;
+import versioned.host.exp.exponent.modules.api.KeepAwakeModule;
 import versioned.host.exp.exponent.modules.api.KeyboardModule;
+import versioned.host.exp.exponent.modules.api.MailComposerModule;
 import versioned.host.exp.exponent.modules.api.PedometerModule;
+import versioned.host.exp.exponent.modules.api.SQLiteModule;
 import versioned.host.exp.exponent.modules.api.ScreenOrientationModule;
+import versioned.host.exp.exponent.modules.api.SecureStoreModule;
 import versioned.host.exp.exponent.modules.api.ShakeModule;
+import versioned.host.exp.exponent.modules.api.SpeechModule;
 import versioned.host.exp.exponent.modules.api.SplashScreenModule;
 import versioned.host.exp.exponent.modules.api.URLHandlerModule;
 import versioned.host.exp.exponent.modules.api.UpdatesModule;
+import versioned.host.exp.exponent.modules.api.WebBrowserModule;
+import versioned.host.exp.exponent.modules.api.av.AVModule;
+import versioned.host.exp.exponent.modules.api.av.video.VideoManager;
+import versioned.host.exp.exponent.modules.api.av.video.VideoViewManager;
 import versioned.host.exp.exponent.modules.api.cognito.RNAWSCognitoModule;
+import versioned.host.exp.exponent.modules.api.components.LinearGradientManager;
 import versioned.host.exp.exponent.modules.api.components.gesturehandler.react.RNGestureHandlerModule;
 import versioned.host.exp.exponent.modules.api.components.gesturehandler.react.RNGestureHandlerPackage;
 import versioned.host.exp.exponent.modules.api.components.lottie.LottiePackage;
 import versioned.host.exp.exponent.modules.api.components.maps.MapsPackage;
 import versioned.host.exp.exponent.modules.api.components.svg.SvgPackage;
-import versioned.host.exp.exponent.modules.api.components.webview.RNCWebViewModule;
-import versioned.host.exp.exponent.modules.api.components.webview.RNCWebViewPackage;
-import versioned.host.exp.exponent.modules.api.netinfo.NetInfoModule;
+import versioned.host.exp.exponent.modules.api.fbads.AdIconViewManager;
+import versioned.host.exp.exponent.modules.api.fbads.AdSettingsManager;
+import versioned.host.exp.exponent.modules.api.fbads.BannerViewManager;
+import versioned.host.exp.exponent.modules.api.fbads.InterstitialAdManager;
+import versioned.host.exp.exponent.modules.api.fbads.MediaViewManager;
+import versioned.host.exp.exponent.modules.api.fbads.NativeAdManager;
+import versioned.host.exp.exponent.modules.api.fbads.NativeAdViewManager;
 import versioned.host.exp.exponent.modules.api.notifications.NotificationsModule;
 import versioned.host.exp.exponent.modules.api.reanimated.ReanimatedModule;
 import versioned.host.exp.exponent.modules.api.screens.RNScreensPackage;
@@ -126,7 +148,7 @@ public class ExponentPackage implements ReactPackage {
       // which are going to be deallocated in a tick, but there's no better solution
       // without a bigger-than-minimal refactor. In SDK32 the only singleton module
       // is TaskService which is safe to initialize more than once.
-      List<? extends SingletonModule> packageSingletonModules = expoPackage.createSingletonModules(context);
+      List<SingletonModule> packageSingletonModules = expoPackage.createSingletonModules(context);
       for (SingletonModule singletonModule : packageSingletonModules) {
         if (!sSingletonModulesClasses.contains(singletonModule.getClass())) {
           sSingletonModules.add(singletonModule);
@@ -164,17 +186,35 @@ public class ExponentPackage implements ReactPackage {
 
         nativeModules.add(new ExponentAsyncStorageModule(reactContext, mManifest));
         nativeModules.add(new NotificationsModule(reactContext, mManifest, mExperienceProperties));
+        nativeModules.add(new ImagePickerModule(reactContext, scopedContext, experienceId));
+        nativeModules.add(new ImageManipulatorModule(reactContext, scopedContext));
+        nativeModules.add(new FacebookModule(reactContext));
+        nativeModules.add(new AmplitudeModule(reactContext, scopedContext));
         nativeModules.add(new RNViewShotModule(reactContext, scopedContext));
+        nativeModules.add(new KeepAwakeModule(reactContext));
         nativeModules.add(new ExponentTestNativeModule(reactContext));
+        nativeModules.add(new WebBrowserModule(reactContext));
+        nativeModules.add(new AVModule(reactContext, scopedContext, experienceId));
+        nativeModules.add(new VideoManager(reactContext));
+        nativeModules.add(new NativeAdManager(reactContext));
+        nativeModules.add(new AdSettingsManager(reactContext));
+        nativeModules.add(new InterstitialAdManager(reactContext));
         nativeModules.add(new PedometerModule(reactContext));
+        nativeModules.add(new SQLiteModule(reactContext, scopedContext));
+        nativeModules.add(new DocumentPickerModule(reactContext, scopedContext));
         nativeModules.add(new ErrorRecoveryModule(reactContext, experienceId));
+        nativeModules.add(new IntentLauncherModule(reactContext));
         nativeModules.add(new ScreenOrientationModule(reactContext));
+        nativeModules.add(new SpeechModule(reactContext));
+        nativeModules.add(new SecureStoreModule(reactContext, scopedContext));
+        nativeModules.add(new BrightnessModule(reactContext));
         nativeModules.add(new RNGestureHandlerModule(reactContext));
         nativeModules.add(new RNAWSCognitoModule(reactContext));
+        nativeModules.add(new MailComposerModule(reactContext));
+        nativeModules.add(new CalendarModule(reactContext, experienceId));
         nativeModules.add(new ReanimatedModule(reactContext));
         nativeModules.add(new SplashScreenModule(reactContext, experienceId));
-        nativeModules.add(new RNCWebViewModule(reactContext));
-        nativeModules.add(new NetInfoModule(reactContext));
+
         SvgPackage svgPackage = new SvgPackage();
         nativeModules.addAll(svgPackage.createNativeModules(reactContext));
 
@@ -194,7 +234,14 @@ public class ExponentPackage implements ReactPackage {
 
   @Override
   public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-    List<ViewManager> viewManagers = new ArrayList<>();
+    List<ViewManager> viewManagers = new ArrayList<>(Arrays.<ViewManager>asList(
+        new LinearGradientManager(),
+        new VideoViewManager(),
+        new NativeAdViewManager(),
+        new BannerViewManager(),
+        new MediaViewManager(),
+        new AdIconViewManager()
+    ));
 
     // Add view manager from 3rd party library packages.
     addViewManagersFromPackages(reactContext, viewManagers, Arrays.<ReactPackage>asList(
@@ -202,8 +249,7 @@ public class ExponentPackage implements ReactPackage {
         new MapsPackage(),
         new LottiePackage(),
         new RNGestureHandlerPackage(),
-        new RNScreensPackage(),
-        new RNCWebViewPackage()
+        new RNScreensPackage()
     ));
 
     viewManagers.addAll(mModuleRegistryAdapter.createViewManagers(reactContext));

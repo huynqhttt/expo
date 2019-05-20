@@ -1,1 +1,1 @@
-../../../../FBAudienceNetwork/Static/FBAudienceNetwork.framework/Headers/FBNativeAdViewAttributes.h
+../../../../FBAudienceNetwork/FBAudienceNetwork.framework/Headers/FBNativeAdViewAttributes.h

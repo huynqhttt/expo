@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { forEach } from 'lodash';
-import { AdMobBanner } from 'expo-ads-admob';
+import { AdMobBanner } from 'expo';
 
 import { mountAndWaitFor as originalMountAndWaitFor } from './helpers';
 

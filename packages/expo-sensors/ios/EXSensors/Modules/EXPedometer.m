@@ -2,22 +2,22 @@
 
 #import <EXSensors/EXPedometer.h>
 #import <CoreMotion/CoreMotion.h>
-#import <UMCore/UMModuleRegistry.h>
-#import <UMCore/UMAppLifecycleService.h>
-#import <UMCore/UMEventEmitterService.h>
+#import <EXCore/EXModuleRegistry.h>
+#import <EXCore/EXAppLifecycleService.h>
+#import <EXCore/EXEventEmitterService.h>
 
 NSString * const EXPedometerUpdateEventName = @"Exponent.pedometerUpdate";
 NSString * const EXPedometerModuleName = @"ExponentPedometer";
 
-@interface EXPedometer () <UMAppLifecycleListener>
+@interface EXPedometer () <EXAppLifecycleListener>
 
 @property (nonatomic, assign) BOOL isWatching;
 @property (nonatomic, strong) NSDate *watchStartDate;
 @property (nonatomic, strong) CMPedometer *pedometer;
 @property (nonatomic, copy) CMPedometerHandler watchHandler;
 
-@property (nonatomic, weak) id<UMEventEmitterService> eventEmitter;
-@property (nonatomic, weak) id<UMAppLifecycleService> lifecycleManager;
+@property (nonatomic, weak) id<EXEventEmitterService> eventEmitter;
+@property (nonatomic, weak) id<EXAppLifecycleService> lifecycleManager;
 
 @end
 
@@ -37,7 +37,7 @@ NSString * const EXPedometerModuleName = @"ExponentPedometer";
       
       __strong EXPedometer *strongSelf = weakSelf;
       if (strongSelf) {
-        __strong id<UMEventEmitterService> eventEmitter = strongSelf.eventEmitter;
+        __strong id<EXEventEmitterService> eventEmitter = strongSelf.eventEmitter;
         if (eventEmitter) {
           [eventEmitter sendEventWithName:EXPedometerUpdateEventName
                                      body:@{@"steps": pedometerData.numberOfSteps}];
@@ -48,9 +48,9 @@ NSString * const EXPedometerModuleName = @"ExponentPedometer";
   return self;
 }
 
-# pragma mark - UMModuleRegistryConsumer
+# pragma mark - EXModuleRegistryConsumer
 
-- (void)setModuleRegistry:(UMModuleRegistry *)moduleRegistry
+- (void)setModuleRegistry:(EXModuleRegistry *)moduleRegistry
 {
   if (_lifecycleManager) {
     [_lifecycleManager unregisterAppLifecycleListener:self];
@@ -62,8 +62,8 @@ NSString * const EXPedometerModuleName = @"ExponentPedometer";
   [self stopObserving];
   
   if (moduleRegistry) {
-    _eventEmitter = [moduleRegistry getModuleImplementingProtocol:@protocol(UMEventEmitterService)];
-    _lifecycleManager = [moduleRegistry getModuleImplementingProtocol:@protocol(UMAppLifecycleService)];
+    _eventEmitter = [moduleRegistry getModuleImplementingProtocol:@protocol(EXEventEmitterService)];
+    _lifecycleManager = [moduleRegistry getModuleImplementingProtocol:@protocol(EXAppLifecycleService)];
   }
   
   if (_lifecycleManager) {
@@ -83,14 +83,14 @@ NSString * const EXPedometerModuleName = @"ExponentPedometer";
 
 # pragma mark - Expo module
 
-UM_REGISTER_MODULE();
+EX_REGISTER_MODULE();
 
 + (const NSString *)exportedModuleName
 {
   return EXPedometerModuleName;
 }
 
-# pragma mark - UMEventEmitter
+# pragma mark - EXEventEmitter
 
 - (NSArray<NSString *> *)supportedEvents
 {
@@ -122,11 +122,11 @@ UM_REGISTER_MODULE();
 
 # pragma mark - Client code API
 
-UM_EXPORT_METHOD_AS(getStepCountAsync,
+EX_EXPORT_METHOD_AS(getStepCountAsync,
                     getStepCountAsync:(nonnull NSNumber *)startTime
                     endTime:(nonnull NSNumber *)endTime
-                    resolver:(UMPromiseResolveBlock)resolve
-                    rejecter:(UMPromiseRejectBlock)reject)
+                    resolver:(EXPromiseResolveBlock)resolve
+                    rejecter:(EXPromiseRejectBlock)reject)
 {
   CMPedometer *pedometer = [self getPedometerInstance];
   
@@ -142,12 +142,12 @@ UM_EXPORT_METHOD_AS(getStepCountAsync,
   }];
 }
 
-UM_EXPORT_METHOD_AS(isAvailableAsync, isAvailableAsync:(UMPromiseResolveBlock)resolve rejecter:(UMPromiseRejectBlock)reject)
+EX_EXPORT_METHOD_AS(isAvailableAsync, isAvailableAsync:(EXPromiseResolveBlock)resolve rejecter:(EXPromiseRejectBlock)reject)
 {
   resolve(@([CMPedometer isStepCountingAvailable]));
 }
 
-# pragma mark - UMAppLifecycleListener
+# pragma mark - EXAppLifecycleListener
 
 - (void)onAppBackgrounded {
   if (_isWatching) {

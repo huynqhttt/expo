@@ -3,14 +3,6 @@ import { NativeModules, StyleSheet, Text, View } from 'react-native';
 
 import { getAppLoadingLifecycleEmitter } from './AppLoading';
 
-const { ExponentAppLoadingManager } = NativeModules;
-
-async function finishedAsync(): Promise<any> {
-  if (ExponentAppLoadingManager && ExponentAppLoadingManager.finishedAsync) {
-    return await ExponentAppLoadingManager.finishedAsync();
-  }
-}
-
 type Props = {
   children: React.ReactNode;
 };
@@ -42,16 +34,13 @@ export default class RootErrorBoundary extends React.Component<Props, State> {
   _subscribeToGlobalErrors = () => {
     this._appLoadingIsMounted = true;
 
-    // Bacon: This isn't supported in RNWeb yet
     let ErrorUtils = global.ErrorUtils;
-
-    if (!ErrorUtils) return;
-
     let originalErrorHandler = ErrorUtils.getGlobalHandler();
 
     ErrorUtils.setGlobalHandler((error, isFatal) => {
       if (this._appLoadingIsMounted) {
-        finishedAsync();
+        NativeModules.ExponentAppLoadingManager &&
+          NativeModules.ExponentAppLoadingManager.finishedAsync();
 
         if (isFatal) {
           this.setState({ error });
@@ -72,7 +61,8 @@ export default class RootErrorBoundary extends React.Component<Props, State> {
   // Test this by adding `throw new Error('example')` to your root component
   componentDidCatch(error: Error) {
     if (this._appLoadingIsMounted) {
-      finishedAsync();
+      NativeModules.ExponentAppLoadingManager &&
+        NativeModules.ExponentAppLoadingManager.finishedAsync();
 
       this.setState({ error });
     }

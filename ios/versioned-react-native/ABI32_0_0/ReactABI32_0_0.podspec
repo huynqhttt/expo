@@ -13,7 +13,7 @@ else
 end
 
 folly_compiler_flags = '-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1'
-folly_version = '2018.10.22.00'
+folly_version = '2016.10.31.00'
 
 Pod::Spec.new do |s|
   s.name                    = "ReactABI32_0_0"
@@ -112,6 +112,7 @@ Pod::Spec.new do |s|
     ss.dependency         "FBAudienceNetwork"
     ss.dependency         "FBSDKCoreKit"
     ss.dependency         "FBSDKLoginKit"
+    ss.dependency         "FBSDKShareKit"
     ss.dependency         "GoogleSignIn"
     ss.dependency         "GoogleMaps"
     ss.dependency         "Google-Maps-iOS-Utils"

@@ -1,8 +1,5 @@
 import { Platform } from 'react-native';
-import { Linking } from 'expo';
-
-import * as WebBrowser from 'expo-web-browser';
-import Constants from 'expo-constants';
+import { Constants, Linking, WebBrowser } from 'expo';
 
 import { waitFor } from './helpers';
 
@@ -48,6 +45,7 @@ export function test(t) {
         // "The specified URL has an unsupported scheme. Only HTTP and HTTPS URLs are supported."
         t.it('listener gets called with a proper URL when opened from a web modal', async () => {
           let handlerCalled = false;
+          // we add two pluses here so test-suite knows to ignore the deep link content (see index.js line 92)
           const testUrl = Linking.makeUrl('++message=hello');
           const handler = ({ url }) => {
             t.expect(url).toEqual(testUrl);
@@ -80,7 +78,7 @@ export function test(t) {
         const handler = ({ url }) => {
           t.expect(url).toEqual(Linking.makeUrl('++message=Redirected automatically by timer'));
           handlerCalled = true;
-          if (Platform.OS === 'ios') WebBrowser.dismissBrowser();
+          WebBrowser.dismissBrowser();
         };
         Linking.addEventListener('url', handler);
         await WebBrowser.openBrowserAsync(`${redirectingBackendUrl}${Linking.makeUrl('++')}`);

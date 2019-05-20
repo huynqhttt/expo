@@ -16,8 +16,8 @@ Pod::Spec.new do |s|
   s.preserve_paths = 'EXFileSystem/**/*.{h,m}'
   s.requires_arc   = true
 
-  s.dependency 'UMCore'
-  s.dependency 'UMFileSystemInterface'
+  s.dependency 'EXCore'
+  s.dependency 'EXFileSystemInterface'
 
 end
 

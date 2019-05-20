@@ -1,4 +1,4 @@
-import { NativeModulesProxy } from '@unimodules/core';
+import { NativeModulesProxy } from 'expo-core';
 
 import { mockPlatformIOS } from '../../test/mocking';
 import Magnetometer from '../Magnetometer';

@@ -16,6 +16,6 @@ Pod::Spec.new do |s|
   s.preserve_paths = 'EXBackgroundFetch/**/*.{h,m}'
   s.requires_arc   = true
 
-  s.dependency 'UMCore'
-  s.dependency 'UMTaskManagerInterface'
+  s.dependency 'EXCore'
+  s.dependency 'EXTaskManagerInterface'
 end

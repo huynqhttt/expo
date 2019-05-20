@@ -6,11 +6,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
 
-import org.unimodules.core.ModuleRegistry;
-import org.unimodules.core.interfaces.ModuleRegistryConsumer;
-import org.unimodules.interfaces.constants.ConstantsInterface;
+import expo.core.ModuleRegistry;
+import expo.core.interfaces.ModuleRegistryConsumer;
+import expo.interfaces.constants.ConstantsInterface;
 import expo.modules.filesystem.FilePermissionModule;
-import org.unimodules.interfaces.filesystem.Permission;
+import expo.interfaces.filesystem.Permission;
 import host.exp.exponent.utils.ScopedContext;
 
 public class ScopedFilePermissionModule extends FilePermissionModule implements ModuleRegistryConsumer {

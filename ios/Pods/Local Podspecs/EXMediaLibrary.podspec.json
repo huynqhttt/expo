@@ -1,11 +1,11 @@
 {
   "name": "EXMediaLibrary",
-  "version": "5.0.0-rc.1",
-  "summary": "Provides access to user's media library.",
-  "description": "Provides access to user's media library.",
+  "version": "2.0.0",
+  "summary": "Expo MediaLibrary module",
+  "description": "Expo MediaLibrary module",
   "license": "MIT",
   "authors": "650 Industries, Inc.",
-  "homepage": "https://docs.expo.io/versions/latest/sdk/media-library/",
+  "homepage": "https://docs.expo.io/",
   "platforms": {
     "ios": "10.0"
   },
@@ -16,10 +16,10 @@
   "preserve_paths": "EXMediaLibrary/**/*.{h,m}",
   "requires_arc": true,
   "dependencies": {
-    "UMCore": [
+    "EXCore": [
 
     ],
-    "UMPermissionsInterface": [
+    "EXPermissionsInterface": [
 
     ]
   }

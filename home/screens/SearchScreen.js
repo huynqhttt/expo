@@ -1,4 +1,6 @@
-import Constants from 'expo-constants';
+/* @flow */
+
+import { Constants } from 'expo';
 import React from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 

@@ -1,25 +1,25 @@
 // Copyright 2016-present 650 Industries. All rights reserved.
 
 #import <EXPermissions/EXRemoteNotificationRequester.h>
-#import <UMCore/UMUtilities.h>
+#import <EXCore/EXUtilities.h>
 #import <EXPermissions/EXUserNotificationRequester.h>
 
 NSString * const EXAppDidRegisterForRemoteNotificationsNotificationName = @"kEXAppDidRegisterForRemoteNotificationsNotification";
 
 @interface EXRemoteNotificationRequester ()
 
-@property (nonatomic, strong) UMPromiseResolveBlock resolve;
-@property (nonatomic, strong) UMPromiseRejectBlock reject;
+@property (nonatomic, strong) EXPromiseResolveBlock resolve;
+@property (nonatomic, strong) EXPromiseRejectBlock reject;
 @property (nonatomic, weak) id<EXPermissionRequesterDelegate> delegate;
 @property (nonatomic, assign) BOOL remoteNotificationsRegistrationIsPending;
 @property (nonatomic, strong) EXUserNotificationRequester *localNotificationRequester;
-@property (nonatomic, weak) UMModuleRegistry *moduleRegistry;
+@property (nonatomic, weak) EXModuleRegistry *moduleRegistry;
 
 @end
 
 @implementation EXRemoteNotificationRequester
 
-- (instancetype)initWithModuleRegistry: (UMModuleRegistry *) moduleRegistry {
+- (instancetype)initWithModuleRegistry: (EXModuleRegistry *) moduleRegistry {
   if (self = [super init]) {
     _remoteNotificationsRegistrationIsPending = NO;
     _moduleRegistry = moduleRegistry;
@@ -27,11 +27,11 @@ NSString * const EXAppDidRegisterForRemoteNotificationsNotificationName = @"kEXA
   return self;
 }
 
-+ (NSDictionary *)permissionsWithModuleRegistry:(UMModuleRegistry *)moduleRegistry
++ (NSDictionary *)permissionsWithModuleRegistry:(EXModuleRegistry *)moduleRegistry
 {
   __block EXPermissionStatus status;
-  [UMUtilities performSynchronouslyOnMainThread:^{
-    status = (UMSharedApplication().isRegisteredForRemoteNotifications) ?
+  [EXUtilities performSynchronouslyOnMainThread:^{
+    status = (EXSharedApplication().isRegisteredForRemoteNotifications) ?
     EXPermissionStatusGranted :
     EXPermissionStatusUndetermined;
   }];
@@ -43,7 +43,7 @@ NSString * const EXAppDidRegisterForRemoteNotificationsNotificationName = @"kEXA
   return permissions;
 }
 
-- (void)requestPermissionsWithResolver:(UMPromiseResolveBlock)resolve rejecter:(UMPromiseRejectBlock)reject
+- (void)requestPermissionsWithResolver:(EXPromiseResolveBlock)resolve rejecter:(EXPromiseRejectBlock)reject
 {
   if (_resolve != nil || _reject != nil) {
     reject(@"E_AWAIT_PROMISE", @"Another request for the same permission is already being handled.", nil);
@@ -54,8 +54,8 @@ NSString * const EXAppDidRegisterForRemoteNotificationsNotificationName = @"kEXA
   _reject = reject;
 
   BOOL __block isRegisteredForRemoteNotifications = NO;
-  [UMUtilities performSynchronouslyOnMainThread:^{
-    isRegisteredForRemoteNotifications = UMSharedApplication().isRegisteredForRemoteNotifications;
+  [EXUtilities performSynchronouslyOnMainThread:^{
+    isRegisteredForRemoteNotifications = EXSharedApplication().isRegisteredForRemoteNotifications;
   }];
 
   if (isRegisteredForRemoteNotifications) {
@@ -71,7 +71,7 @@ NSString * const EXAppDidRegisterForRemoteNotificationsNotificationName = @"kEXA
     [_localNotificationRequester requestPermissionsWithResolver:nil rejecter:nil];
     _remoteNotificationsRegistrationIsPending = YES;
     dispatch_async(dispatch_get_main_queue(), ^{
-      [UMSharedApplication() registerForRemoteNotifications];
+      [EXSharedApplication() registerForRemoteNotifications];
     });
   }
 }

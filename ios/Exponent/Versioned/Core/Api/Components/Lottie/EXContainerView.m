@@ -78,22 +78,11 @@
   }
 }
 
-- (void)play:(nullable LOTAnimationCompletionBlock)completion {
-  if (_animationView != nil) {
-    if (completion != nil) {
-      [_animationView playWithCompletion:completion];
-    } else {
-      [_animationView play];
-    }
-  }
-}
-
 - (void)playFromFrame:(NSNumber *)startFrame
-              toFrame:(NSNumber *)endFrame
-       withCompletion:(nullable LOTAnimationCompletionBlock)completion {
+              toFrame:(NSNumber *)endFrame {
   if (_animationView != nil) {
     [_animationView playFromFrame:startFrame
-                          toFrame:endFrame withCompletion:completion];
+                          toFrame:endFrame withCompletion:nil];
   }
 }
 
@@ -107,15 +96,13 @@
 # pragma mark Private
 
 - (void)replaceAnimationView:(LOTAnimationView *)next {
-  UIViewContentMode contentMode = UIViewContentModeScaleAspectFit;
   if (_animationView != nil) {
-    contentMode = _animationView.contentMode;
     [_animationView removeFromSuperview];
   }
   _animationView = next;
   [self addSubview: next];
   [_animationView reactSetFrame:self.frame];
-  [_animationView setContentMode:contentMode];
+  [_animationView setContentMode:UIViewContentModeScaleAspectFit];
   [self applyProperties];
 }
 

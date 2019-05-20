@@ -12,6 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 FOUNDATION_EXPORT NSString *kEXKernelErrorDomain;
+FOUNDATION_EXPORT const NSUInteger kEXErrorCodeAppForbidden;
 
 typedef NS_ENUM(NSInteger, EXKernelErrorCode) {
   EXKernelErrorCodeModuleDeallocated,

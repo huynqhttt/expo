@@ -12,7 +12,7 @@
 #include "ABI32_0_0Yoga-internal.h"
 
 namespace facebook {
-namespace ABI32_0_0yoga {
+namespace yoga {
 typedef std::string string;
 
 static void indent(string* base, uint32_t level) {
@@ -227,5 +227,5 @@ void ABI32_0_0YGNodeToString(
   }
   appendFormatedString(str, "</div>");
 }
-} // namespace ABI32_0_0yoga
+} // namespace yoga
 } // namespace facebook

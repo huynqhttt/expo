@@ -18,9 +18,6 @@ import host.exp.exponent.kernel.KernelConfig;
 import host.exp.exponent.test.TestCompletedEvent;
 import host.exp.exponent.test.TestActionEvent;
 import host.exp.exponent.test.TestResolvePromiseEvent;
-import host.exp.exponent.generated.ExponentBuildConstants;
-
-import org.json.JSONObject;
 
 public class ExponentTestNativeModule extends ReactContextBaseJavaModule {
 
@@ -51,18 +48,6 @@ public class ExponentTestNativeModule extends ReactContextBaseJavaModule {
       mIdToPromise.get(event.id).resolve(true);
       mIdToPromise.remove(event.id);
     }
-  }
-
-  @Override
-  public Map<String, Object> getConstants() {
-    Map<String, Object> constants = new HashMap<>();
-    try {
-      JSONObject config = new JSONObject(ExponentBuildConstants.TEST_CONFIG);
-      constants.put("isInCI", config.has("isInCI"));
-    } catch (Throwable e) {
-      constants.put("isInCI", false);
-    }
-    return constants;
   }
 
   @ReactMethod

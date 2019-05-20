@@ -2,51 +2,64 @@
 
 #import <EXAppAuth/EXAppAuth.h>
 #import <AppAuth/AppAuth.h>
-#import <UMCore/UMUtilitiesInterface.h>
-#import <UMCore/UMUtilities.h>
+#import <EXCore/EXUtilitiesInterface.h>
+#import <EXCore/EXUtilities.h>
 #import <EXAppAuth/EXAppAuth+JSON.h>
-#import <EXAppAuth/EXAppAuthSessionsManager.h>
 
 static NSString *const EXAppAuthError = @"ERR_APP_AUTH";
 
-@interface EXAppAuth ()
+@interface EXAppAuth() {
+  id<OIDExternalUserAgentSession> session;
+}
 
-@property (nonatomic, weak) UMModuleRegistry *moduleRegistry;
-@property (nonatomic, weak) id<UMUtilitiesInterface> utilities;
-@property (nonatomic, weak) id<EXAppAuthSessionsManagerInterface> sessionsManager;
+@property (nonatomic, weak) EXModuleRegistry *moduleRegistry;
+@property (nonatomic, weak) id<EXUtilitiesInterface> utilities;
 
 @end
 
 @implementation EXAppAuth
 
+static EXAppAuth *shared = nil;
+
++ (nonnull instancetype)instance {
+  return shared;
+}
+
+- (id)init {
+  self = [super init];
+  if (self != nil) {
+    shared = self;
+  }
+  return self;
+}
+
 #pragma mark - Expo
 
-UM_EXPORT_MODULE(ExpoAppAuth);
+EX_EXPORT_MODULE(ExpoAppAuth);
 
 - (dispatch_queue_t)methodQueue
 {
   return dispatch_get_main_queue();
 }
 
-- (void)setModuleRegistry:(UMModuleRegistry *)moduleRegistry
+- (void)setModuleRegistry:(EXModuleRegistry *)moduleRegistry
 {
   _moduleRegistry = moduleRegistry;
-  _sessionsManager = [moduleRegistry getSingletonModuleForName:@"AppAuthSessionsManager"];
-  _utilities = [moduleRegistry getModuleImplementingProtocol:@protocol(UMUtilitiesInterface)];
+  _utilities = [moduleRegistry getModuleImplementingProtocol:@protocol(EXUtilitiesInterface)];
 }
 
 - (NSDictionary *)constantsToExport
 {
   return @{
-           @"OAuthRedirect": UMNullIfNil([self _getOAuthRedirect]),
-           @"URLSchemes": UMNullIfNil([[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleURLTypes"]),
+           @"OAuthRedirect": EXNullIfNil([self _getOAuthRedirect]),
+           @"URLSchemes": EXNullIfNil([[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleURLTypes"]),
            };
 }
 
-UM_EXPORT_METHOD_AS(executeAsync,
+EX_EXPORT_METHOD_AS(executeAsync,
                     executeAsync:(NSDictionary *)options
-                    resolve:(UMPromiseResolveBlock)resolve
-                    reject:(UMPromiseRejectBlock)reject)
+                    resolve:(EXPromiseResolveBlock)resolve
+                    reject:(EXPromiseRejectBlock)reject)
 {
   BOOL isRefresh = [options[@"isRefresh"] boolValue];
   NSDictionary *serviceConfiguration = options[@"serviceConfiguration"];
@@ -96,8 +109,8 @@ UM_EXPORT_METHOD_AS(executeAsync,
 
 - (void)_authorizeWithConfiguration:(OIDServiceConfiguration *)configuration
                             options:(NSDictionary *)options
-                            resolve:(UMPromiseResolveBlock)resolve
-                             reject:(UMPromiseRejectBlock)reject
+                            resolve:(EXPromiseResolveBlock)resolve
+                             reject:(EXPromiseRejectBlock)reject
 {
   NSArray *scopes = options[@"scopes"];
   NSDictionary *additionalParameters = options[@"additionalParameters"];
@@ -111,11 +124,15 @@ UM_EXPORT_METHOD_AS(executeAsync,
                                             responseType:OIDResponseTypeCode
                                     additionalParameters:additionalParameters];
 
-  [UMUtilities performSynchronouslyOnMainThread:^{
-    __block id<OIDExternalUserAgentSession> session;
-    __weak id<EXAppAuthSessionsManagerInterface> sessionsManager = self->_sessionsManager;
+  [EXUtilities performSynchronouslyOnMainThread:^{
+    __weak typeof(self) weakSelf = self;
+
     OIDAuthStateAuthorizationCallback callback = ^(OIDAuthState *_Nullable authState, NSError *_Nullable error) {
-      [sessionsManager unregisterSession:session];
+      typeof(self) strongSelf = weakSelf;
+      if (strongSelf != nil) {
+        // Destroy the current session
+        strongSelf->session = nil;
+      }
       if (authState) {
         NSDictionary *tokenResponse = [EXAppAuth _tokenResponseNativeToJSON:authState.lastTokenResponse request:options];
         resolve(tokenResponse);
@@ -134,10 +151,9 @@ UM_EXPORT_METHOD_AS(executeAsync,
     } else {
       presentingViewController = [[[UIApplication sharedApplication] keyWindow] rootViewController];
     }
-    session = [OIDAuthState authStateByPresentingAuthorizationRequest:request
-                                             presentingViewController:presentingViewController
-                                                             callback:callback];
-    [self->_sessionsManager registerSession:session];
+    self->session = [OIDAuthState authStateByPresentingAuthorizationRequest:request
+                                                   presentingViewController:presentingViewController
+                                                                   callback:callback];
   }];
 }
 
@@ -160,8 +176,8 @@ UM_EXPORT_METHOD_AS(executeAsync,
 
 - (void)_refreshWithConfiguration:(OIDServiceConfiguration *)configuration
                           options:(NSDictionary *)options
-                          resolve:(UMPromiseResolveBlock)resolve
-                           reject:(UMPromiseRejectBlock)reject {
+                          resolve:(EXPromiseResolveBlock)resolve
+                           reject:(EXPromiseRejectBlock)reject {
   NSArray *scopes = options[@"scopes"];
   NSDictionary *additionalParameters = options[@"additionalParameters"];
 
@@ -191,8 +207,8 @@ UM_EXPORT_METHOD_AS(executeAsync,
 
 - (OIDDiscoveryCallback)_getCallback:(NSDictionary *)options
                            isRefresh:(BOOL)isRefresh
-                            resolver:(UMPromiseResolveBlock)resolve
-                            rejecter:(UMPromiseRejectBlock)reject
+                            resolver:(EXPromiseResolveBlock)resolve
+                            rejecter:(EXPromiseRejectBlock)reject
 {
   return ^(OIDServiceConfiguration *_Nullable configuration, NSError *_Nullable error) {
     if (configuration) {
@@ -204,10 +220,16 @@ UM_EXPORT_METHOD_AS(executeAsync,
   };
 }
 
+#pragma mark - Public
+
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<NSString *, id> *)options {
+  return [session resumeExternalUserAgentFlowWithURL:url];
+}
+
 #pragma mark - Static
 
 // EX prefix for versioning to work smoothly
-void EXrejectWithError(UMPromiseRejectBlock reject, NSError *error) {
+void EXrejectWithError(EXPromiseRejectBlock reject, NSError *error) {
   NSString *errorMessage = [NSString stringWithFormat:@"%@: %@", EXAppAuthError, error.localizedDescription];
   if (error.localizedFailureReason != nil && ![error.localizedFailureReason isEqualToString:@""]) errorMessage = [NSString stringWithFormat:@"%@, Reason: %@", errorMessage, error.localizedFailureReason];
   if (error.localizedRecoverySuggestion != nil && ![error.localizedRecoverySuggestion isEqualToString:@""]) errorMessage = [NSString stringWithFormat:@"%@, Try: %@", errorMessage, error.localizedRecoverySuggestion];

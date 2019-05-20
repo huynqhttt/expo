@@ -1,25 +1,17 @@
 import { Platform } from 'react-native';
 import ExponentPrint from './ExponentPrint';
-import { UnavailabilityError } from '@unimodules/core';
+import { UnavailabilityError } from 'expo-errors';
 import {
   PrintOptions,
-  Printer,
-  OrientationType,
+  SelectResult,
+  OrientationConstant,
   FilePrintOptions,
   FilePrintResult,
 } from './Print.types';
 
-export {
-  Printer,
-  FilePrintOptions,
-  FilePrintResult,
-  PrintOptions,
-  OrientationType,
-};
+const Orientation: OrientationConstant = ExponentPrint.Orientation;
 
-export const Orientation: OrientationType = ExponentPrint.Orientation;
-
-export async function printAsync(options: PrintOptions): Promise<void> {
+async function printAsync(options: PrintOptions): Promise<void> {
   if (Platform.OS === 'web') {
     return await ExponentPrint.print(options);
   }
@@ -32,7 +24,7 @@ export async function printAsync(options: PrintOptions): Promise<void> {
   return await ExponentPrint.print(options);
 }
 
-export async function selectPrinterAsync(): Promise<Printer> {
+async function selectPrinterAsync(): Promise<SelectResult> {
   if (ExponentPrint.selectPrinter) {
     return await ExponentPrint.selectPrinter();
   }
@@ -40,6 +32,13 @@ export async function selectPrinterAsync(): Promise<Printer> {
   throw new UnavailabilityError('Print', 'selectPrinterAsync');
 }
 
-export async function printToFileAsync(options: FilePrintOptions = {}): Promise<FilePrintResult> {
+async function printToFileAsync(options: FilePrintOptions = {}): Promise<FilePrintResult> {
   return await ExponentPrint.printToFileAsync(options);
 }
+
+export default {
+  Orientation,
+  printAsync,
+  selectPrinterAsync,
+  printToFileAsync,
+};

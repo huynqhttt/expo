@@ -4,40 +4,41 @@
 
 @implementation EXLocalization
 
-UM_EXPORT_MODULE(ExpoLocalization)
+EX_EXPORT_MODULE(ExpoLocalization)
 
-/* 
- * Thanks to RNLocalize 
- * https://github.com/react-native-community/react-native-localize/blame/e9e01ce65e3891241c88adf162679ab8e37759e3/ios/RNLanguages.m#L13
- */
- 
-UM_EXPORT_METHOD_AS(getLocalizationAsync,
-                    getLocalizationAsync:(UMPromiseResolveBlock)resolve
-                    rejecter:(UMPromiseRejectBlock)reject)
+- (NSMutableArray *)ensureLocaleTags:(NSArray *)locales
+{
+    NSMutableArray *sanitizedLocales = [NSMutableArray array];
+    for (id locale in locales)
+        [sanitizedLocales addObject:[locale stringByReplacingOccurrencesOfString:@"_" withString:@"-"]];
+
+    return sanitizedLocales;
+}
+
+EX_EXPORT_METHOD_AS(getLocalizationAsync,
+                    getLocalizationAsync:(EXPromiseResolveBlock)resolve
+                    rejecter:(EXPromiseRejectBlock)reject)
 {
   resolve([self constantsToExport]);
 }
 
 - (NSDictionary *)constantsToExport
 {
-  NSArray<NSString *> *preferredLocales = [NSLocale preferredLanguages];
+  NSArray *preferredLocales = [self ensureLocaleTags:[NSLocale preferredLanguages]];
   NSTimeZone *currentTimeZone = [NSTimeZone localTimeZone];
   NSString *countryCode = [[NSLocale currentLocale] objectForKey:NSLocaleCountryCode];
   
+  NSLocaleLanguageDirection localeLanguageDirection = [NSLocale characterDirectionForLanguage:[NSLocale preferredLanguages][0]];
+  BOOL isRTL = localeLanguageDirection == NSLocaleLanguageDirectionRightToLeft;
+  
   return @{
-           @"isRTL": @([self isRTL]),
+           @"isRTL": @(isRTL),
            @"locale": [preferredLocales objectAtIndex:0],
            @"locales": preferredLocales,
            @"timezone": [currentTimeZone name],
            @"isoCurrencyCodes": [NSLocale ISOCurrencyCodes],
            @"country": countryCode
            };
-}
-
-- (BOOL)isRTL
-{
-  // https://stackoverflow.com/a/14183124/1123156
-  return [NSLocale characterDirectionForLanguage:[NSLocale preferredLanguages][0]] == NSLocaleLanguageDirectionRightToLeft;
 }
 
 @end

@@ -2,6 +2,7 @@ package expo.modules.taskManager;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -9,19 +10,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.unimodules.core.ModuleRegistry;
-import org.unimodules.core.interfaces.InternalModule;
-import org.unimodules.core.interfaces.LifecycleEventListener;
-import org.unimodules.core.interfaces.ModuleRegistryConsumer;
-import org.unimodules.core.interfaces.services.EventEmitter;
-import org.unimodules.core.interfaces.services.UIManager;
-import org.unimodules.interfaces.constants.ConstantsInterface;
-import org.unimodules.interfaces.taskManager.TaskConsumerInterface;
-import org.unimodules.interfaces.taskManager.TaskServiceInterface;
-import org.unimodules.interfaces.taskManager.TaskManagerInterface;
+import expo.core.ModuleRegistry;
+import expo.core.interfaces.InternalModule;
+import expo.core.interfaces.ModuleRegistryConsumer;
+import expo.core.interfaces.services.EventEmitter;
+import expo.interfaces.constants.ConstantsInterface;
+import expo.interfaces.taskManager.TaskConsumerInterface;
+import expo.interfaces.taskManager.TaskServiceInterface;
+import expo.interfaces.taskManager.TaskManagerInterface;
 
-public class TaskManagerInternalModule implements InternalModule, ModuleRegistryConsumer, TaskManagerInterface, LifecycleEventListener {
-  private UIManager mUIManager;
+public class TaskManagerInternalModule implements InternalModule, ModuleRegistryConsumer, TaskManagerInterface {
   private EventEmitter mEventEmitter;
   private ConstantsInterface mConstants;
   private TaskServiceInterface mTaskService;
@@ -44,21 +42,12 @@ public class TaskManagerInternalModule implements InternalModule, ModuleRegistry
 
   @Override
   public void setModuleRegistry(ModuleRegistry moduleRegistry) {
-    if (mUIManager != null) {
-      mUIManager.unregisterLifecycleEventListener(this);
-    }
-
-    mUIManager = moduleRegistry.getModule(UIManager.class);
     mEventEmitter = moduleRegistry.getModule(EventEmitter.class);
     mConstants = moduleRegistry.getModule(ConstantsInterface.class);
     mTaskService = moduleRegistry.getSingletonModule("TaskService", TaskServiceInterface.class);
 
     // Register in TaskService.
     mTaskService.setTaskManager(this, getAppId(), getAppUrl());
-
-    if (mUIManager != null) {
-      mUIManager.registerLifecycleEventListener(this);
-    }
   }
 
   //endregion
@@ -120,46 +109,6 @@ public class TaskManagerInternalModule implements InternalModule, ModuleRegistry
       return (boolean) mConstants.getConstants().get("isHeadless");
     }
     return false;
-  }
-
-  //endregion
-  //region LifecycleEventListener
-
-  @Override
-  public void onHostResume() {
-    if (!isRunningInHeadlessMode()) {
-      List<TaskConsumerInterface> taskConsumers = mTaskService.getTaskConsumers(getAppId());
-      for (TaskConsumerInterface taskConsumer : taskConsumers) {
-        if (taskConsumer instanceof LifecycleEventListener) {
-          ((LifecycleEventListener) taskConsumer).onHostResume();
-        }
-      }
-    }
-  }
-
-  @Override
-  public void onHostPause() {
-    if (!isRunningInHeadlessMode()) {
-      List<TaskConsumerInterface> taskConsumers = mTaskService.getTaskConsumers(getAppId());
-      for (TaskConsumerInterface taskConsumer : taskConsumers) {
-        if (taskConsumer instanceof LifecycleEventListener) {
-          ((LifecycleEventListener) taskConsumer).onHostPause();
-        }
-      }
-    }
-  }
-
-  @Override
-  public void onHostDestroy() {
-    if (!isRunningInHeadlessMode()) {
-      List<TaskConsumerInterface> taskConsumers = mTaskService.getTaskConsumers(getAppId());
-      for (TaskConsumerInterface taskConsumer : taskConsumers) {
-        if (taskConsumer instanceof LifecycleEventListener) {
-          ((LifecycleEventListener) taskConsumer).onHostDestroy();
-        }
-      }
-      mTaskService.setTaskManager(null, getAppId(), getAppUrl());
-    }
   }
 
   //endregion

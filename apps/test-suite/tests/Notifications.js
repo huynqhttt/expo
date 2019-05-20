@@ -2,9 +2,7 @@
 
 import { isMatch } from 'lodash';
 import { Platform } from 'react-native';
-import { Notifications } from 'expo';
-
-import * as Permissions from 'expo-permissions';
+import { Notifications, Permissions } from 'expo';
 
 import { waitFor } from './helpers';
 import * as TestUtils from '../TestUtils';

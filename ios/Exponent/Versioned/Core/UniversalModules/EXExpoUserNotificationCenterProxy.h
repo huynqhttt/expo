@@ -1,11 +1,11 @@
 //  Copyright © 2018 650 Industries. All rights reserved.
 
 #import <Foundation/Foundation.h>
-#import <UMCore/UMInternalModule.h>
-#import <UMPermissionsInterface/UMUserNotificationCenterProxyInterface.h>
+#import <EXCore/EXInternalModule.h>
+#import <EXPermissionsInterface/EXUserNotificationCenterProxyInterface.h>
 
-@interface EXExpoUserNotificationCenterProxy : NSObject <UMInternalModule, UMUserNotificationCenterProxyInterface>
+@interface EXExpoUserNotificationCenterProxy : NSObject <EXInternalModule, EXUserNotificationCenterProxyInterface>
 
-- (instancetype)initWithUserNotificationCenter:(id<UMUserNotificationCenterProxyInterface>)userNotificationCenter;
+- (instancetype)initWithUserNotificationCenter:(id<EXUserNotificationCenterProxyInterface>)userNotificationCenter;
 
 @end

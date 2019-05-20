@@ -2,8 +2,8 @@
 
 #import <LocalAuthentication/LocalAuthentication.h>
 
-#import <UMCore/UMUtilities.h>
-#import <UMConstantsInterface/UMConstantsInterface.h>
+#import <EXCore/EXUtilities.h>
+#import <EXConstantsInterface/EXConstantsInterface.h>
 #import <EXLocalAuthentication/EXLocalAuthentication.h>
 
 typedef NS_ENUM(NSInteger, EXAuthenticationType) {
@@ -11,27 +11,39 @@ typedef NS_ENUM(NSInteger, EXAuthenticationType) {
   EXAuthenticationTypeFacialRecognition = 2,
 };
 
+@interface EXLocalAuthentication ()
+
+@property (nonatomic, weak) EXModuleRegistry *moduleRegistry;
+
+@end
+
 @implementation EXLocalAuthentication
 
-UM_EXPORT_MODULE(ExpoLocalAuthentication)
+EX_EXPORT_MODULE(ExpoLocalAuthentication)
 
-UM_EXPORT_METHOD_AS(supportedAuthenticationTypesAsync,
-                    supportedAuthenticationTypesAsync:(UMPromiseResolveBlock)resolve
-                    reject:(UMPromiseRejectBlock)reject)
+- (void)setModuleRegistry:(EXModuleRegistry *)moduleRegistry
+{
+  _moduleRegistry = moduleRegistry;
+}
+
+
+EX_EXPORT_METHOD_AS(supportedAuthenticationTypesAsync,
+                    supportedAuthenticationTypesAsync:(EXPromiseResolveBlock)resolve
+                    reject:(EXPromiseRejectBlock)reject)
 {
   NSMutableArray *results = [NSMutableArray array];
-  if ([[self class] isTouchIdDevice]) {
+  if (EXIsTouchIDDevice()) {
     [results addObject:@(EXAuthenticationTypeFingerprint)];
   }
-  if ([[self class] isFaceIdDevice]) {
+  if (EXIsFaceIDDevice()) {
     [results addObject:@(EXAuthenticationTypeFacialRecognition)];
   }
   resolve(results);
 }
 
-UM_EXPORT_METHOD_AS(hasHardwareAsync,
-                    hasHardwareAsync:(UMPromiseResolveBlock)resolve
-                    reject:(UMPromiseRejectBlock)reject)
+EX_EXPORT_METHOD_AS(hasHardwareAsync,
+                    hasHardwareAsync:(EXPromiseResolveBlock)resolve
+                    reject:(EXPromiseRejectBlock)reject)
 {
   LAContext *context = [LAContext new];
   NSError *error = nil;
@@ -48,9 +60,9 @@ UM_EXPORT_METHOD_AS(hasHardwareAsync,
   resolve(@(isAvailable));
 }
 
-UM_EXPORT_METHOD_AS(isEnrolledAsync,
-                    isEnrolledAsync:(UMPromiseResolveBlock)resolve
-                    reject:(UMPromiseRejectBlock)reject)
+EX_EXPORT_METHOD_AS(isEnrolledAsync,
+                    isEnrolledAsync:(EXPromiseResolveBlock)resolve
+                    reject:(EXPromiseRejectBlock)reject)
 {
   LAContext *context = [LAContext new];
   NSError *error = nil;
@@ -61,18 +73,25 @@ UM_EXPORT_METHOD_AS(isEnrolledAsync,
   resolve(@(isEnrolled));
 }
 
-UM_EXPORT_METHOD_AS(authenticateAsync,
+EX_EXPORT_METHOD_AS(authenticateAsync,
                     authenticateAsync:(NSString *)reason
-                    resolve:(UMPromiseResolveBlock)resolve
-                    reject:(UMPromiseRejectBlock)reject)
+                    resolve:(EXPromiseResolveBlock)resolve
+                    reject:(EXPromiseRejectBlock)reject)
 {
   NSString *warningMessage;
 
-  if ([[self class] isFaceIdDevice]) {
+  if (EXIsFaceIDDevice()) {
     NSString *usageDescription = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"NSFaceIDUsageDescription"];
 
     if (!usageDescription) {
-      warningMessage = @"FaceID is available but has not been configured. To enable FaceID, provide `NSFaceIDUsageDescription`.";
+      id<EXConstantsInterface> constants = [_moduleRegistry getModuleImplementingProtocol:@protocol(EXConstantsInterface)];
+
+      // it works fine if there is no module implementing `expo-constants-interface` because in that case we know it isn't Expo Client
+      if ([constants.appOwnership isEqualToString:@"expo"]) {
+        warningMessage = @"FaceID is not available in Expo Client. You can use it in a standalone Expo app by providing `NSFaceIDUsageDescription`.";
+      } else {
+        warningMessage = @"FaceID is available but has not been configured. To enable FaceID, provide `NSFaceIDUsageDescription`.";
+      }
     }
   }
 
@@ -88,7 +107,7 @@ UM_EXPORT_METHOD_AS(authenticateAsync,
                       resolve(@{
                                 @"success": @(success),
                                 @"error": error == nil ? [NSNull null] : [self convertErrorCode:error],
-                                @"warning": UMNullIfNil(warningMessage),
+                                @"warning": EXNullIfNil(warningMessage),
                                 });
                     }];
 }
@@ -117,11 +136,11 @@ UM_EXPORT_METHOD_AS(authenticateAsync,
     case LAErrorAuthenticationFailed:
       return @"authentication_failed";
     default:
-      return [@"unknown: " stringByAppendingFormat:@"%ld, %@", (long) error.code, error.localizedDescription];
+      return [@"unknown: " stringByAppendingFormat:@"%ld, %@", error.code, error.localizedDescription];
   }
 }
 
-+ (BOOL)isFaceIdDevice
+static BOOL EXIsFaceIDDevice()
 {
   static BOOL isFaceIDDevice = NO;
 
@@ -138,7 +157,7 @@ UM_EXPORT_METHOD_AS(authenticateAsync,
   return isFaceIDDevice;
 }
 
-+ (BOOL)isTouchIdDevice
+static BOOL EXIsTouchIDDevice()
 {
   static BOOL isTouchIDDevice = NO;
   static dispatch_once_t onceToken;

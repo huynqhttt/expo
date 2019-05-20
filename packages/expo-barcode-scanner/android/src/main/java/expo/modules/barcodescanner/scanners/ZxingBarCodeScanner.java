@@ -2,7 +2,6 @@ package expo.modules.barcodescanner.scanners;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Point;
 
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.zxing.BarcodeFormat;
@@ -13,11 +12,8 @@ import com.google.zxing.MultiFormatReader;
 import com.google.zxing.NotFoundException;
 import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.RGBLuminanceSource;
-import com.google.zxing.ResultPoint;
 import com.google.zxing.common.HybridBinarizer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -25,8 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.unimodules.interfaces.barcodescanner.BarCodeScannerResult;
-import org.unimodules.interfaces.barcodescanner.BarCodeScannerSettings;
+import expo.interfaces.barcodescanner.BarCodeScannerResult;
+import expo.interfaces.barcodescanner.BarCodeScannerSettings;
 
 public class ZxingBarCodeScanner extends ExpoBarCodeScanner {
 
@@ -68,9 +64,8 @@ public class ZxingBarCodeScanner extends ExpoBarCodeScanner {
 
   private BarCodeScannerResult scan(LuminanceSource source) {
     com.google.zxing.Result barcode = null;
-    BinaryBitmap bitmap = null;
     try {
-      bitmap = new BinaryBitmap(new HybridBinarizer(source));
+      BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
       barcode = mMultiFormatReader.decodeWithState(bitmap);
     } catch (NotFoundException e) {
       // No barcode found, result is already null.
@@ -78,12 +73,7 @@ public class ZxingBarCodeScanner extends ExpoBarCodeScanner {
       t.printStackTrace();
     }
 
-    if (bitmap == null || barcode == null){
-      return null;
-    }
-    ArrayList<Integer> cornerPoints = new ArrayList(); // empty list
-
-    return new BarCodeScannerResult(GMV_FROM_ZXING.get(barcode.getBarcodeFormat()), barcode.getText(), cornerPoints, bitmap.getHeight(), bitmap.getWidth());
+    return barcode != null ? new BarCodeScannerResult(GMV_FROM_ZXING.get(barcode.getBarcodeFormat()), barcode.getText()) : null;
   }
 
   @Override

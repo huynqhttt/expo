@@ -1,8 +1,8 @@
-#import <UMCore/UMDefines.h>
-#import <UMCore/UMEventEmitter.h>
-#import <UMCore/UMModuleRegistryConsumer.h>
+#import <EXCore/EXDefines.h>
+#import <EXCore/EXEventEmitter.h>
+#import <EXCore/EXModuleRegistryConsumer.h>
 
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
-@interface EXAdsAdMobInterstitial : UMExportedModule <UMEventEmitter, UMModuleRegistryConsumer, GADInterstitialDelegate>
+@interface EXAdsAdMobInterstitial : EXExportedModule <EXEventEmitter, EXModuleRegistryConsumer, GADInterstitialDelegate>
 @end

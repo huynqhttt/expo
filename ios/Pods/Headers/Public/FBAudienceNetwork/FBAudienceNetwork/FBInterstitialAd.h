@@ -1,1 +1,1 @@
-../../../../FBAudienceNetwork/Static/FBAudienceNetwork.framework/Headers/FBInterstitialAd.h
+../../../../FBAudienceNetwork/FBAudienceNetwork.framework/Headers/FBInterstitialAd.h

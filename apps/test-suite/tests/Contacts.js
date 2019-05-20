@@ -1,7 +1,6 @@
 'use strict';
 
-import * as Permissions from 'expo-permissions';
-import * as Contacts from 'expo-contacts';
+import { Contacts, Permissions } from 'expo';
 import { Platform } from 'react-native';
 import * as TestUtils from '../TestUtils';
 

@@ -1,5 +1,6 @@
 package versioned.host.exp.exponent.modules.api.components.gesturehandler;
 
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -400,9 +401,9 @@ public class GestureHandler<T extends GestureHandler> {
       float height= mHitSlop[HIT_SLOP_HEIGHT_IDX];
       if (hitSlopSet(width)) {
         if (!hitSlopSet(padLeft)) {
-          left = right - width;
+          left = padRight - width;
         } else if (!hitSlopSet(padRight)) {
-          right = left + width;
+          right = padLeft + width;
         }
       }
       if (hitSlopSet(height)) {

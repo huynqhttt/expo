@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { forEach } from 'lodash';
-import { PublisherBanner } from 'expo-ads-admob';
+import { PublisherBanner } from 'expo';
 
 import { mountAndWaitFor as originalMountAndWaitFor } from './helpers';
 
-export const name = 'AdMobPublisherBanner';
+export const name = 'PublisherBanner';
 
 const validAdUnitID = 'ca-app-pub-3940256099942544/6300978111';
 const invalidAdUnitID = 'id';

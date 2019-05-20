@@ -1,22 +1,26 @@
-import { AppLoading } from 'expo';
-import { Asset } from 'expo-asset';
-import Constants from 'expo-constants';
-import * as Font from 'expo-font';
+import { AppLoading, Asset, Constants, Font } from 'expo';
 import React from 'react';
-import { Linking, Platform, StatusBar, StyleSheet, View } from 'react-native';
-import { Assets as StackAssets } from 'react-navigation-stack';
+import { ActivityIndicator, Linking, Platform, StatusBar, StyleSheet, View } from 'react-native';
 import url from 'url';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Assets as StackAssets } from 'react-navigation-stack';
 
-import './menu/MenuView';
-
+import jwtDecode from 'jwt-decode';
 import Navigation from './navigation/Navigation';
 import HistoryActions from './redux/HistoryActions';
 import SessionActions from './redux/SessionActions';
 import SettingsActions from './redux/SettingsActions';
-import Store from './redux/Store';
 import LocalStorage from './storage/LocalStorage';
+import MenuView from './menu/MenuView';
+import Store from './redux/Store';
+
+import addListenerWithNativeCallback from './utils/addListenerWithNativeCallback';
+import getViewerUsernameAsync from './utils/getViewerUsernameAsync';
+
+function cacheImages(images) {
+  return images.map(image => Asset.fromModule(image).downloadAsync());
+}
 
 // Download and cache stack assets, don't block loading on this though
 Asset.loadAsync(StackAssets);
@@ -28,6 +32,10 @@ export default class App extends React.Component {
 
   componentDidMount() {
     this._initializeStateAsync();
+    addListenerWithNativeCallback(
+      'ExponentKernel.getIsValidHomeManifestToOpen',
+      this._getIsValidHomeManifestToOpen
+    );
   }
 
   _isExpoHost = host => {
@@ -55,6 +63,11 @@ export default class App extends React.Component {
     return !this._isExpoHost(host);
   };
 
+  // TODO(eric): remove
+  _getIsValidHomeManifestToOpen = async () => {
+    return { isValid: true };
+  };
+
   _initializeStateAsync = async () => {
     try {
       Store.dispatch(SettingsActions.loadSettings());
@@ -75,7 +88,7 @@ export default class App extends React.Component {
       // ..
     } finally {
       this.setState({ isReady: true }, async () => {
-        if (Platform.OS === 'ios') {
+        if (Platform.OS == 'ios') {
           // if expo client is opened via deep linking, we'll get the url here
           const initialUrl = await Linking.getInitialURL();
           if (initialUrl) {

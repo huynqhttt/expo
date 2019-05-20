@@ -16,8 +16,8 @@ Pod::Spec.new do |s|
   s.preserve_paths = 'EXMediaLibrary/**/*.{h,m}'
   s.requires_arc   = true
 
-  s.dependency 'UMCore'
-  s.dependency 'UMPermissionsInterface'
+  s.dependency 'EXCore'
+  s.dependency 'EXPermissionsInterface'
 
 end
 

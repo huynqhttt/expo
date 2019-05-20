@@ -1,11 +1,11 @@
 // Copyright 2015-present 650 Industries. All rights reserved.
 
 #import <EXSensors/EXDeviceMotion.h>
-#import <UMSensorsInterface/UMDeviceMotionInterface.h>
+#import <EXSensorsInterface/EXDeviceMotionInterface.h>
 
 @implementation EXDeviceMotion
 
-UM_EXPORT_MODULE(ExponentDeviceMotion);
+EX_EXPORT_MODULE(ExponentDeviceMotion);
 
 - (NSDictionary *)constantsToExport
 {
@@ -21,19 +21,14 @@ UM_EXPORT_MODULE(ExponentDeviceMotion);
   return @"deviceMotionDidUpdate";
 }
 
-- (id)getSensorServiceFromModuleRegistry:(UMModuleRegistry *)moduleRegistry
+- (id)getSensorServiceFromModuleRegistry:(EXModuleRegistry *)moduleRegistry
 {
-  return [moduleRegistry getModuleImplementingProtocol:@protocol(UMDeviceMotionInterface)];
+  return [moduleRegistry getModuleImplementingProtocol:@protocol(EXDeviceMotionInterface)];
 }
 
 - (void)setUpdateInterval:(double)updateInterval onSensorService:(id)sensorService
 {
   [sensorService setDeviceMotionUpdateInterval:updateInterval];
-}
-
-- (BOOL)isAvailable:(id)sensorService
-{
-  return [sensorService isDeviceMotionAvailable];
 }
 
 - (void)subscribeToSensorService:(id)sensorService withHandler:(void (^)(NSDictionary *event))handlerBlock

@@ -2,11 +2,11 @@
 
 #import <Foundation/Foundation.h>
 #import "EXNotifications.h"
-#import <UMPermissionsInterface/UMUserNotificationCenterProxyInterface.h>
+#import <EXPermissionsInterface/EXUserNotificationCenterProxyInterface.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface EXUserNotificationCenter : NSObject <EXUserNotificationCenterService, UMUserNotificationCenterProxyInterface>
+@interface EXUserNotificationCenter : NSObject <EXUserNotificationCenterService, EXUserNotificationCenterProxyInterface>
 
 @end
 

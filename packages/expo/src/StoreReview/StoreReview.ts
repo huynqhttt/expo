@@ -8,16 +8,16 @@ import ExponentStoreReview from './ExponentStoreReview';
  * iOS 10.3 or greater
  * `SKStoreReviewController` class is available
  */
-export function isSupported(): boolean {
+export function isSupported() {
   return ExponentStoreReview && ExponentStoreReview.isSupported;
 }
 
 /*
  * Use the iOS `SKStoreReviewController` API to prompt a user rating without leaving the app.
  */
-export async function requestReview(): Promise<void> {
+export async function requestReview() {
   if (ExponentStoreReview && ExponentStoreReview.requestReview) {
-    await ExponentStoreReview.requestReview();
+    ExponentStoreReview.requestReview();
   } else {
     /*
      * If StoreReview is unavailable then get the store URL from the `app.json` and open to the store.
@@ -28,8 +28,7 @@ export async function requestReview(): Promise<void> {
       if (!supported) {
         console.log("Expo.StoreReview.requestReview(): Can't open store url: ", url);
       } else {
-        await Linking.openURL(url);
-        return; 
+        return Linking.openURL(url);
       }
     } else {
       // If the store URL is missing, let the dev know.
@@ -45,20 +44,19 @@ export async function requestReview(): Promise<void> {
  * iOS: https://docs.expo.io/versions/latest/workflow/configuration#appstoreurlurl-to-your-app-on-the-apple-app-store-if-you-have-deployed-it-there-this-is-used-to-link-to-your-store-page-from-your-expo-project-page-if-your-app-is-public
  * Android: https://docs.expo.io/versions/latest/workflow/configuration#playstoreurlurl-to-your-app-on-the-google-play-store-if-you-have-deployed-it-there-this-is-used-to-link-to-your-store-page-from-your-expo-project-page-if-your-app-is-public
  */
-export function storeUrl(): string | null {
-  const { manifest } = Constants;
-  if (Platform.OS === 'ios' && manifest.ios) {
-    return manifest.ios.appStoreUrl;
-  } else if (Platform.OS === 'android' && manifest.android) {
-    return manifest.android.playStoreUrl;
-  } else {
-    return null;
+export function storeUrl() {
+  const { OS } = Platform;
+  if (OS === 'ios') {
+    return Constants.manifest.ios.appStoreUrl;
+  } else if (OS === 'android') {
+    return Constants.manifest.android.playStoreUrl;
   }
+  throw new Error(`StoreReview.storeUrl() is not supported on ${OS}`);
 }
 
 /*
  * A flag to detect if this module can do anything
  */
-export function hasAction(): boolean {
+export function hasAction() {
   return !!storeUrl() || isSupported();
 }

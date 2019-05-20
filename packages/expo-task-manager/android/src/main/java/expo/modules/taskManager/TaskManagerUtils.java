@@ -16,36 +16,36 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.unimodules.interfaces.taskManager.TaskManagerUtilsInterface;
-import org.unimodules.interfaces.taskManager.TaskInterface;
+import expo.interfaces.taskManager.TaskManagerUtilsInterface;
+import expo.interfaces.taskManager.TaskInterface;
 
 public class TaskManagerUtils implements TaskManagerUtilsInterface {
-  // Request code number used for pending intents created by this module.
-  private static final int PENDING_INTENT_REQUEST_CODE = 5055;
-
   private static final int DEFAULT_OVERRIDE_DEADLINE = 60 * 1000; // 1 minute
 
   // make intent and job ids locally-unique
+  private static Integer sCurrentIntentId = 2137;
   private static Integer sCurrentJobId = 2137;
 
   // Set of job IDs that are scheduled but not started yet.
   private static final List<Integer> sPendingJobIds = new ArrayList<>();
 
-  @Override
   public PendingIntent createTaskIntent(Context context, TaskInterface task) {
-    return createTaskIntent(context, task, PendingIntent.FLAG_UPDATE_CURRENT);
+    Integer intentId = sCurrentIntentId++;
+    String appId = task.getAppId();
+    String taskName = task.getName();
+    Intent intent = new Intent(TaskBroadcastReceiver.INTENT_ACTION, null, context, TaskBroadcastReceiver.class);
+
+    Uri dataUri = new Uri.Builder()
+        .appendQueryParameter("intentId", intentId.toString())
+        .appendQueryParameter("appId", appId)
+        .appendQueryParameter("taskName", taskName)
+        .build();
+
+    intent.setData(dataUri);
+
+    return PendingIntent.getBroadcast(context, intentId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
   }
 
-  @Override
-  public void cancelTaskIntent(Context context, String appId, String taskName) {
-    PendingIntent pendingIntent = createTaskIntent(context, appId, taskName, PendingIntent.FLAG_NO_CREATE);
-
-    if (pendingIntent != null) {
-      pendingIntent.cancel();
-    }
-  }
-
-  @Override
   public void scheduleJob(Context context, JobInfo jobInfo) {
     JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
 
@@ -63,51 +63,12 @@ public class TaskManagerUtils implements TaskManagerUtilsInterface {
     }
   }
 
-  @Override
   public void scheduleJob(Context context, TaskInterface task, PersistableBundle data) {
-    JobInfo jobInfo = createJobInfo(context, task, data);
+    Integer jobId = sCurrentJobId++;
+    PersistableBundle extras = createExtrasForTask(task, data);
+    JobInfo jobInfo = createJobInfo(context, jobId, extras);
+
     scheduleJob(context, jobInfo);
-  }
-
-  @Override
-  public JobInfo.Builder createJobInfoBuilder(Context context, TaskInterface task, PersistableBundle data) {
-    return new JobInfo.Builder(sCurrentJobId++, new ComponentName(context, TaskJobService.class))
-        .setExtras(createExtrasForTask(task, data));
-  }
-
-  @Override
-  public void cancelScheduledJob(Context context, int jobId) {
-    JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-
-    if (jobScheduler != null) {
-      jobScheduler.cancel(jobId);
-    } else {
-      Log.e(this.getClass().getName(), "Job scheduler not found!");
-    }
-  }
-
-  private PendingIntent createTaskIntent(Context context, String appId, String taskName, int flags) {
-    if (context == null) {
-      return null;
-    }
-
-    Intent intent = new Intent(TaskBroadcastReceiver.INTENT_ACTION, null, context, TaskBroadcastReceiver.class);
-
-    Uri dataUri = new Uri.Builder()
-        .appendQueryParameter("appId", appId)
-        .appendQueryParameter("taskName", taskName)
-        .build();
-
-    intent.setData(dataUri);
-
-    return PendingIntent.getBroadcast(context, PENDING_INTENT_REQUEST_CODE, intent, flags);
-  }
-
-  private PendingIntent createTaskIntent(Context context, TaskInterface task, int flags) {
-    String appId = task.getAppId();
-    String taskName = task.getName();
-
-    return createTaskIntent(context, appId, taskName, flags);
   }
 
   @SuppressWarnings("unchecked")
@@ -147,7 +108,7 @@ public class TaskManagerUtils implements TaskManagerUtilsInterface {
   }
 
   @SuppressWarnings("unchecked")
-  private static double[] listToDoubleArray(List<Object> list) {
+  public static double[] listToDoubleArray(List<Object> list) {
     double[] doubles = new double[list.size()];
     for (int i = 0; i < list.size(); i++) {
       doubles[i] = (Double) list.get(i);
@@ -190,20 +151,22 @@ public class TaskManagerUtils implements TaskManagerUtilsInterface {
     }
   }
 
-  static void removeFromPendingJobs(int jobId) {
+  public static void removeFromPendingJobs(int jobId) {
     sPendingJobIds.remove((Integer) jobId);
   }
 
   //region private
 
-  private JobInfo createJobInfo(Context context, TaskInterface task, PersistableBundle data) {
-    return createJobInfoBuilder(context, task, data)
+  private JobInfo createJobInfo(Context context, int jobId, PersistableBundle extras) {
+    return new JobInfo.Builder(jobId, new ComponentName(context, TaskJobService.class))
+        .setExtras(extras)
         .setMinimumLatency(0)
         .setOverrideDeadline(DEFAULT_OVERRIDE_DEADLINE)
+        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
         .build();
   }
 
-  public PersistableBundle createExtrasForTask(TaskInterface task, PersistableBundle data) {
+  private PersistableBundle createExtrasForTask(TaskInterface task, PersistableBundle data) {
     PersistableBundle extras = new PersistableBundle();
 
     extras.putString("appId", task.getAppId());

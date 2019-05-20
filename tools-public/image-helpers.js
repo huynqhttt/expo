@@ -14,11 +14,12 @@ async function resizeIconWithSharpAsync(iconSizePx, iconFilename, destinationIco
   fs.writeFileSync(filename, buffer);
 }
 
-async function getImageDimensionsWithSharpAsync(dirname, basename) {
+async function getImageDimensionsWithSharpAsync(basename, dirname) {
   const filename = path.join(dirname, basename);
+
   try {
-    let { width, height } = await sharp(filename).metadata();
-    return { width, height };
+    let meta = await sharp(filename).metadata();
+    return [meta.width, meta.height];
   } catch (e) {
     return null;
   }

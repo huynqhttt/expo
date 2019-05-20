@@ -8,9 +8,9 @@
 
 #import <EXFaceDetector/EXFaceDetectorModule.h>
 #import <EXFaceDetector/EXFaceEncoder.h>
-#import <UMFileSystemInterface/UMFileSystemInterface.h>
+#import <EXFileSystemInterface/EXFileSystemInterface.h>
 #import <EXFaceDetector/EXFaceDetectorUtils.h>
-#import <UMCore/UMModuleRegistry.h>
+#import <EXCore/EXModuleRegistry.h>
 
 static const NSString *kModeOptionName = @"mode";
 static const NSString *kDetectLandmarksOptionName = @"detectLandmarks";
@@ -18,7 +18,7 @@ static const NSString *kRunClassificationsOptionName = @"runClassifications";
 
 @interface EXFaceDetectorModule ()
 
-@property (nonatomic, weak) UMModuleRegistry *moduleRegistry;
+@property (nonatomic, weak) EXModuleRegistry *moduleRegistry;
 
 @end
 
@@ -27,7 +27,7 @@ static const NSString *kRunClassificationsOptionName = @"runClassifications";
 static NSFileManager *fileManager = nil;
 static NSDictionary *defaultDetectorOptions = nil;
 
-- (instancetype)initWithModuleRegistry:(UMModuleRegistry *)moduleRegistry
+- (instancetype)initWithModuleRegistry:(EXModuleRegistry *)moduleRegistry
 {
   self = [super init];
   if (self) {
@@ -37,19 +37,19 @@ static NSDictionary *defaultDetectorOptions = nil;
   return self;
 }
 
-UM_EXPORT_MODULE(ExpoFaceDetector);
+EX_EXPORT_MODULE(ExpoFaceDetector);
 
 - (NSDictionary *)constantsToExport
 {
   return [EXFaceDetectorUtils constantsToExport];
 }
 
-- (void)setModuleRegistry:(UMModuleRegistry *)moduleRegistry
+- (void)setModuleRegistry:(EXModuleRegistry *)moduleRegistry
 {
   _moduleRegistry = moduleRegistry;
 }
 
-UM_EXPORT_METHOD_AS(detectFaces, detectFaces:(nonnull NSDictionary *)options resolver:(UMPromiseResolveBlock)resolve rejecter:(UMPromiseRejectBlock)reject) {
+EX_EXPORT_METHOD_AS(detectFaces, detectFaces:(nonnull NSDictionary *)options resolver:(EXPromiseResolveBlock)resolve rejecter:(EXPromiseRejectBlock)reject) {
   NSString *uri = options[@"uri"];
   if (uri == nil) {
     reject(@"E_FACE_DETECTION_FAILED", @"You must define a URI.", nil);
@@ -60,13 +60,13 @@ UM_EXPORT_METHOD_AS(detectFaces, detectFaces:(nonnull NSDictionary *)options res
   NSString *path = [url.path stringByStandardizingPath];
   
   NSException *exception;
-  id<UMFileSystemInterface> fileSystem = [_moduleRegistry getModuleImplementingProtocol:@protocol(UMFileSystemInterface)];
+  id<EXFileSystemInterface> fileSystem = [_moduleRegistry getModuleImplementingProtocol:@protocol(EXFileSystemInterface)];
   if (!fileSystem || exception) {
     reject(@"E_MODULE_UNAVAILABLE", @"No file system module", nil);
     return;
   }
   
-  if (!([fileSystem permissionsForURI:url] & UMFileSystemPermissionRead)) {
+  if (!([fileSystem permissionsForURI:url] & EXFileSystemPermissionRead)) {
     reject(@"E_FILESYSTEM_PERMISSIONS", [NSString stringWithFormat:@"File '%@' isn't readable.", uri], nil);
     return;
   }

@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import { AdMobInterstitial } from 'expo-ads-admob';
+import { AdMobInterstitial } from 'expo';
 
 export const name = 'AdMobInterstitial';
 

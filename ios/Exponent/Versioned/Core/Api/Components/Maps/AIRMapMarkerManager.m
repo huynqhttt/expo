@@ -27,13 +27,10 @@ RCT_EXPORT_MODULE()
     AIRMapMarker *marker = [AIRMapMarker new];
     [marker addTapGestureRecognizer];
     marker.bridge = self.bridge;
-    marker.isAccessibilityElement = YES;
-    marker.accessibilityElementsHidden = NO;
     return marker;
 }
 
 RCT_EXPORT_VIEW_PROPERTY(identifier, NSString)
-RCT_REMAP_VIEW_PROPERTY(testID, accessibilityIdentifier, NSString)
 //RCT_EXPORT_VIEW_PROPERTY(reuseIdentifier, NSString)
 RCT_EXPORT_VIEW_PROPERTY(title, NSString)
 RCT_REMAP_VIEW_PROPERTY(description, subtitle, NSString)
@@ -75,18 +72,6 @@ RCT_EXPORT_METHOD(hideCallout:(nonnull NSNumber *)reactTag)
             RCTLogError(@"Invalid view returned from registry, expecting AIRMap, got: %@", view);
         } else {
             [(AIRMapMarker *) view hideCalloutView];
-        }
-    }];
-}
-
-RCT_EXPORT_METHOD(redrawCallout:(nonnull NSNumber *)reactTag)
-{
-    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
-        id view = viewRegistry[reactTag];
-        if (![view isKindOfClass:[AIRMapMarker class]]) {
-            RCTLogError(@"Invalid view returned from registry, expecting AIRMap, got: %@", view);
-        } else {
-            //no need to do anything here
         }
     }];
 }

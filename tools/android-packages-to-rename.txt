@@ -8,8 +8,8 @@ com.facebook.react
 com.facebook.systrace
 com.facebook.yoga
 com.facebook.debug
-org.unimodules.core
-org.unimodules.interfaces
+expo.core
+expo.interfaces
 expo.modules
-org.unimodules.adapters
-org.unimodules.errors
+expo.adapters
+expo.errors

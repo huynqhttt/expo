@@ -29,6 +29,7 @@ final class MediaLibraryConstants {
   static final String MEDIA_TYPE_ALL = "all";
 
   static final String SORT_BY_DEFAULT = "default";
+  static final String SORT_BY_ID = "id";
   static final String SORT_BY_CREATION_TIME = "creationTime";
   static final String SORT_BY_MODIFICATION_TIME = "modificationTime";
   static final String SORT_BY_MEDIA_TYPE = "mediaType";
@@ -51,6 +52,7 @@ final class MediaLibraryConstants {
   static final Map<String, String> SORT_KEYS = new HashMap<String, String>() {
     {
       put(SORT_BY_DEFAULT, MediaStore.Images.Media._ID);
+      put(SORT_BY_ID, MediaStore.Images.Media._ID);
       put(SORT_BY_CREATION_TIME, MediaStore.Images.Media.DATE_TAKEN);
       put(SORT_BY_MODIFICATION_TIME, MediaStore.Images.Media.DATE_MODIFIED);
       put(SORT_BY_MEDIA_TYPE, MediaStore.Files.FileColumns.MEDIA_TYPE);
